@@ -40,15 +40,15 @@ conditions_expr <- glue::glue("({paste(sample_conditions, collapse = ') & (')})"
 
 # Defines covariates and labels for each model we want to estimate
 covariates_to_exclude <- list(
-  c(ed, marstat, laborsupply, jobchar),
-  c(marstat, laborsupply, jobchar),
+  c(age, race, region, ed, marstat, wrkhrs, laborsupply, jobchar),
+  c(ed, laborsupply, jobchar),
   c(laborsupply, jobchar),
-  c(jobchar),
+  c(wrkhrs, jobchar),
   c()
 )
 
-model_labels <- c("Model 1: Demographic Controls",
-                  "Model 2: + Education", 
-                  "Model 3: + Marital Status", 
-                  "Model 4: + Labor Supply",
-                  "Model 5: + Job Characteristics")
+model_labels <- c("Model 1: Baseline",
+                  "Model 2: + Background", 
+                  "Model 3: + Education", 
+                  "Model 4: + Work Experience and Job Tenure",
+                  "Model 5: Full")

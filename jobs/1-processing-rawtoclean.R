@@ -735,7 +735,7 @@ fig_a1 <- psid_raw %>%
         axis.text = element_text(size = 12))
 
 ggsave(plot = fig_a1, "figures/fig_a1.jpg", 
-       width = 9, height = 7, units = "in", device='jpeg', dpi=700)
+       width = 10, height = 7, units = "in", device='jpeg', dpi=700)
 
 # We then create a new object using the household roster to create
 # an alternative measure of marital status that distinguishes cohabitors

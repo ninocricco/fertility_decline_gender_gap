@@ -28,15 +28,15 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               data, group = group, years = c(1981, 2019), outcome = outcome,  
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
-                                                                covariates %!in% c(
+                                                                covariates %!in% c(age, race, region,
                                                                   ed, marstat, laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 1981), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
-                                                              covariates %!in% c(
+                                                              covariates %!in% c(age, race, region,
                                                                 ed, marstat, laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 1: Demographic Controls") %>% 
+                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 1: Baseline") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1981, 1991),
@@ -46,15 +46,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               data, group = group, years = c(1981, 2019), outcome = outcome,  
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
-                                                                covariates %!in% c(
-                                                                  marstat, laborsupply, jobchar)]) %>%
+                                                                covariates %!in% c(ed, laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 1981), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                marstat, laborsupply, jobchar)])["crossgroup"] %>%
+                                                                ed, laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 2: + Education") %>% 
+                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 2: + Background") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1981, 1991),
@@ -72,7 +71,7 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               covariates %!in% c(
                                                                 laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 3: + Marital Status") %>% 
+                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 3: + Education") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1981, 1991),
@@ -83,14 +82,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
                                                                 covariates %!in% c(
-                                                                  jobchar)]) %>%
+                                                                  wrkhrs, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 1981), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                jobchar)])["crossgroup"] %>%
+                                                                wrkhrs, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 4: + Labor Supply") %>% 
+                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 4: + Work Experience and Job Tenure") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1981, 1991),
@@ -104,7 +103,7 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                             outcome = outcome, group = group,
                                                             covariates = covariates)["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 5: + Job Characteristics") %>% 
+                                    mutate(var = rownames(.), year = "1980-1990", model = "Model 5: Full") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1991, 2001),
@@ -114,15 +113,15 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               data, group = group, years = c(1981, 2019), outcome = outcome,  
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
-                                                                covariates %!in% c(
-                                                                  ed, marstat, laborsupply, jobchar)]) %>%
+                                                                covariates %!in% c(age, race, region,
+                                                                                   ed, marstat, laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 1991), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
-                                                              covariates %!in% c(
+                                                              covariates %!in% c(age, race, region,
                                                                 ed, marstat, laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 1: Demographic Controls") %>% 
+                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 1: Baseline") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1991, 2001),
@@ -132,15 +131,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               data, group = group, years = c(1981, 2019), outcome = outcome,  
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
-                                                                covariates %!in% c(
-                                                                  marstat, laborsupply, jobchar)]) %>%
+                                                                covariates %!in% c(ed, laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 1991), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                marstat, laborsupply, jobchar)])["crossgroup"] %>%
+                                                                ed, laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 2: + Education") %>% 
+                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 2: + Background") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1991, 2001),
@@ -150,15 +148,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               data, group = group, years = c(1981, 2019), outcome = outcome,  
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
-                                                                covariates %!in% c(
-                                                                  laborsupply, jobchar)]) %>%
+                                                                covariates %!in% c(laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 1991), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
                                                                 laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 3: + Marital Status") %>% 
+                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 3: + Education") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1991, 2001),
@@ -169,14 +166,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
                                                                 covariates %!in% c(
-                                                                  jobchar)]) %>%
+                                                                  wrkhrs, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 1991), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                jobchar)])["crossgroup"] %>%
+                                                                wrkhrs, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 4: + Labor Supply") %>% 
+                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 4: + Work Experience and Job Tenure") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(1991, 2001),
@@ -190,7 +187,7 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                             outcome = outcome, group = group,
                                                             covariates = covariates)["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 5: + Job Characteristics") %>% 
+                                    mutate(var = rownames(.), year = "1990-2001", model = "Model 5: Full") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2001, 2011),
@@ -200,15 +197,15 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               data, group = group, years = c(1981, 2019), outcome = outcome,  
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
-                                                                covariates %!in% c(
+                                                                covariates %!in% c(age, race, region,
                                                                   ed, marstat, laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 2001), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
-                                                              covariates %!in% c(
+                                                              covariates %!in% c(age, race, region,
                                                                 ed, marstat, laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 1: Demographic Controls") %>% 
+                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 1: Baseline") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2001, 2011),
@@ -219,14 +216,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
                                                                 covariates %!in% c(
-                                                                  marstat, laborsupply, jobchar)]) %>%
+                                                                  ed, laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 2001), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                marstat, laborsupply, jobchar)])["crossgroup"] %>%
+                                                                ed, laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 2: + Education") %>% 
+                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 2: + Background") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2001, 2011),
@@ -244,7 +241,7 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               covariates %!in% c(
                                                                 laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 3: + Marital Status") %>% 
+                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 3: + Education") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2001, 2011),
@@ -255,14 +252,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
                                                                 covariates %!in% c(
-                                                                  jobchar)]) %>%
+                                                                  wrkhrs, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 2001), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                jobchar)])["crossgroup"] %>%
+                                                                wrkhrs, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 4: + Labor Supply") %>% 
+                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 4: + Work Experience and Job Tenure") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2001, 2011),
@@ -276,7 +273,7 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                             outcome = outcome, group = group,
                                                             covariates = covariates)["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 5: + Job Characteristics") %>% 
+                                    mutate(var = rownames(.), year = "2000-2010", model = "Model 5: Full") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2011, 2019),
@@ -286,15 +283,15 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               data, group = group, years = c(1981, 2019), outcome = outcome,  
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
-                                                                covariates %!in% c(
+                                                                covariates %!in% c(age, race, region,
                                                                   ed, marstat, laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 2011), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                ed, marstat, laborsupply, jobchar)])["crossgroup"] %>%
+                                                                age, race, region, ed, marstat, laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 1: Demographic Controls") %>% 
+                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 1: Baseline") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2011, 2019),
@@ -305,14 +302,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
                                                                 covariates %!in% c(
-                                                                  marstat, laborsupply, jobchar)]) %>%
+                                                                  ed, laborsupply, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 2011), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                marstat, laborsupply, jobchar)])["crossgroup"] %>%
+                                                                ed, laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 2: + Education") %>% 
+                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 2: + Background") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2011, 2019),
@@ -330,7 +327,7 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               covariates %!in% c(
                                                                 laborsupply, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 3: + Marital Status") %>% 
+                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 3: + Education") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2011, 2019),
@@ -341,14 +338,14 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                               weights = weights, sample_conditions = sample_conditions, 
                                                               covariates = covariates[
                                                                 covariates %!in% c(
-                                                                  jobchar)]) %>%
+                                                                  wrkhrs, jobchar)]) %>%
                                                               filter(year == 1981) %>% mutate(year = 2011), 
                                                             outcome = outcome, group = group,
                                                             covariates = covariates[
                                                               covariates %!in% c(
-                                                                jobchar)])["crossgroup"] %>%
+                                                                wrkhrs, jobchar)])["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 4: + Labor Supply") %>% 
+                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 4: + Work Experience and Job Tenure") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model),
                                   characteristics_component(weights = weights, years = c(2011, 2019),
@@ -362,7 +359,7 @@ decomp_decades_within <-bind_rows(characteristics_component(weights = weights, y
                                                             outcome = outcome, group = group,
                                                             covariates = covariates)["crossgroup"] %>%
                                     as.data.frame() %>% 
-                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 5: + Job Characteristics") %>% 
+                                    mutate(var = rownames(.), year = "2010-2018", model = "Model 5: Full") %>% 
                                     select(var, Characteristics.Gap = crossgroup.chargap, year,
                                            model)) %>%
   mutate_if(is.numeric, ~.*100)
@@ -375,8 +372,8 @@ write_csv(ta6, "tables/tablea6.csv")
 
 kable(ta6 %>% dplyr::select(-model), format = "latex", booktabs = T, 
       caption = "Table A6: Percent of the Changing Gender Pay Gap Within Decade Explained by Fertility Decline") %>%
-  pack_rows("Model 1: Demographic Controls", 1, 2, bold = T) %>% 
-  pack_rows("Model 2: + Education", 2, 2, bold = T) %>%
-  pack_rows("Model 3: + Marital Status", 3, 3, bold = T) %>%
-  pack_rows("Model 4: + Labor Supply", 4, 4, bold = T) %>%
-  pack_rows("Model 5: + Job Characteristics", 5, 5, bold = T)
+  pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
+  pack_rows("Model 2: + Background", 2, 2, bold = T) %>%
+  pack_rows("Model 3: + Education", 3, 3, bold = T) %>%
+  pack_rows("Model 4: + Work Experience and Job Tenure", 4, 4, bold = T) %>%
+  pack_rows("Model 5: Full", 5, 5, bold = T)

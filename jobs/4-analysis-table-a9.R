@@ -47,8 +47,8 @@ write_csv(ta9, "tables/tablea9.csv")
 kable(ta9 %>%
         dplyr::select(-c(Variable, Model)), booktabs = T, format = "latex", 
       caption = "Table A9: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Fertility, Using 2018 Wage Structure") %>%
-  pack_rows("Model 1: Demographic Controls", 1, 2, bold = T) %>% 
-  pack_rows("Model 2: + Education", 3, 4, bold = T) %>% 
-  pack_rows("Model 3: + Marital Status", 5, 6, bold = T) %>% 
-  pack_rows("Model 4:+ Labor Supply", 7, 8, bold = T) %>% 
-  pack_rows("Model 5: + Job Characteristics", 9, 10, bold = T)
+  pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
+  pack_rows("Model 2: + Background", 3, 4, bold = T) %>% 
+  pack_rows("Model 3: + Education", 5, 6, bold = T) %>% 
+  pack_rows("Model 4: + Work Experience and Job Tenure", 7, 8, bold = T) %>% 
+  pack_rows("Model 5: Full", 9, 10, bold = T)

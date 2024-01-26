@@ -109,7 +109,7 @@ rw.modelcoefs <- bind_rows(lfselec.m.df, lfselec.w.df) %>%
 write_csv(rw.modelcoefs, "tables/tablea11.csv")
 
 knitr::kable(rw.modelcoefs, booktabs = T, format = "latex", 
-             caption = "Table A11: Coefficients from the Reweighting Model") %>%
+             caption = "Table A10: Coefficients from the Reweighting Model") %>%
   footnote("Coefficients from gender-specific logistic regressions predicting sample inclusion. Standard errors in parentheses", 
            threeparttable = T) %>%
   add_header_above(c(" " = 2, "Male" = 2, "Female" = 2)) %>%
@@ -227,11 +227,11 @@ knitr::kable(means.table %>% dplyr::select(vars, Men_2019, Men_2019_RW, Women_20
                filter(vars %!in% c("lnhrlywage", "(Intercept)", "agesq", "log.expf", "perwt")) %>%
                dplyr::select(vars, Men_2019, Men_2019_RW, Women_2019, Women_2019_RW), 
              booktabs = T, format = "latex", 
-             caption = "Table A12: 2018 Sample Descriptive Statistics Adjusting for Labor Force Selection") %>%
+             caption = "Table A11: 2018 Sample Descriptive Statistics Adjusting for Labor Force Selection") %>%
   add_header_above(c(" ", "Men" = 2, "Women" = 2)) %>%
   footnote("Descriptive statistics show weighted averages for the analytic sample by year and gender, using sample means and adjusting for changing patterns of labor force selection. The proportion of all PSID heads and wives aged 30-55 that meets our sample inclusion criteria are 76.3 and 62.8 for men and women in 1980, respectively, and 77.9 and 71.3 for men and women in 2018. The sample consists of PSID heads and wives reporting non-zero wages, excludes individuals who report being self-employed, and individuals employed in agriculture or the military", 
            threeparttable = T) %>%
-  pack_rows("Model 1: Demographic Controls", 1, 2, bold = F) %>%
+  pack_rows("+ Background", 1, 2, bold = F) %>%
   pack_rows("Race", 3, 5, bold = F) %>% pack_rows("Region", 6, 8, bold = F) %>%
   pack_rows("Years of Education", 9, 11, bold = F)
 
@@ -355,9 +355,9 @@ ta13 <- left_join(decomp_rwtosw %>% filter(Variable %in% c("num.kids.cont", "Tot
 write_csv(ta13, "tables/tablea13.csv")
 
 kable(ta13 %>% dplyr::select(-Model), booktabs = T, format = "latex", 
-      caption = "Table A13: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, Decomposing Population Change and Changing Labor Force Selection") %>%
-  pack_rows("Model 1: Demographic Controls", 1, 2, bold = T) %>% 
-  pack_rows("Model 2: + Education", 3, 4, bold = T) %>% 
-  pack_rows("Model 3: + Marital Status", 5, 6, bold = T) %>% 
-  pack_rows("Model 4: + Labor Supply", 7, 8, bold = T) %>% 
-  pack_rows("Model 5: + Job Characteristics", 9, 10, bold = T)
+      caption = "Table A12: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, Decomposing Population Change and Changing Labor Force Selection") %>%
+  pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
+  pack_rows("Model 2: + Background", 3, 4, bold = T) %>% 
+  pack_rows("Model 3: + Education", 5, 6, bold = T) %>% 
+  pack_rows("Model 4: + Work Experience and Job Tenure", 7, 8, bold = T) %>% 
+  pack_rows("Model 5: Full", 9, 10, bold = T)

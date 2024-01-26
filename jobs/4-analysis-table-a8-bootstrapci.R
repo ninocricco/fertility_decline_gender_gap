@@ -19,7 +19,7 @@ covariates_cat = c("numkids.1", "numkids.2", "numkids.3plus", "age", "agesq",
                    "Black", "Hispanic", "Other",
                    "Northeast", "Northcentral", "South", 
                    "HighSchool", "SomeCollege", "ba.avdeg", 
-                   "married", "log.expf", "samp.inc.ft",
+                   "married", "log.expf", "ftormore",
                    "emp.tenure", "overwork", "union",
                    "govt.job", "occ.pct.female", 
                    "occ.managers", "manuf")
@@ -29,7 +29,7 @@ covariates_timing = c("afb.cat_21minus",  "afb.cat_23to27",  "afb.cat_28plus",
                       "Black", "Hispanic", "Other",
                       "Northeast", "Northcentral", "South", 
                       "HighSchool", "SomeCollege", "ba.avdeg", 
-                      "married", "log.expf", "samp.inc.ft",
+                      "married", "log.expf", "ftormore",
                       "emp.tenure", "overwork", "union",
                       "govt.job", "occ.pct.female", 
                       "occ.managers", "manuf")
@@ -40,12 +40,28 @@ covariates_cattiming = c("num.kids.cont",
                          "Black", "Hispanic", "Other",
                          "Northeast", "Northcentral", "South", 
                          "HighSchool", "SomeCollege", "ba.avdeg", 
-                         "married", "log.expf", "samp.inc.ft",
+                         "married", "log.expf", "ftormore",
                          "emp.tenure", "overwork", "union",
                          "govt.job", "occ.pct.female", 
                          "occ.managers", "manuf")
 
-for(i in 1:10000){
+sample_conditions_40plus = list("age >= 40",
+                         "samp.exc.mil.ag != 1", 
+                         "samp.exc.selfemp != 1", 
+                         "samp.exc.region != 1",
+                         "samp.exc.zerowage != 1", 
+                         "ann.wrk.hrs > 0")
+
+covariates = c("num.kids.cont", "age", "agesq",
+               "Black", "Hispanic", "Other",
+               "Northeast", "Northcentral", "South", 
+               "HighSchool", "SomeCollege", "ba.avdeg", 
+               "married", "log.expf", "emp.tenure", 
+               "ftormore", "overwork", 
+               "union", "govt.job", "occ.pct.female", 
+               "occ.managers", "manuf")
+
+for(i in 3019:10000){
   
   set.seed(i)
   
@@ -67,7 +83,7 @@ for(i in 1:10000){
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cat[
-                             covariates_cat %!in% c(
+                             covariates_cat %!in% c(age, race, region,
                                ed, "married", laborsupply, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
@@ -76,12 +92,12 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "Demographic Controls"),
+      mutate(model = "Baseline"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cat[
                              covariates_cat %!in% c(
-                               "married", laborsupply, jobchar)])["crossgroup"] %>%
+                               ed, laborsupply, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
              setNames(paste0("chargap_", .y))) %>%
@@ -89,7 +105,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Education"),
+      mutate(model = "+ Background"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cat[
@@ -102,11 +118,11 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Marital Status"),
+      mutate(model = "+ Education"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cat[
-                             covariates_cat %!in% jobchar])["crossgroup"] %>%
+                             covariates_cat %!in% c(wrkhrs, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
              setNames(paste0("chargap_", .y))) %>%
@@ -114,7 +130,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Labor Supply"),
+      mutate(model = "+ Work Experience and Job Tenure"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cat)["crossgroup"] %>%
@@ -125,7 +141,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Job Characteristics")) %>%
+      mutate(model = "Full")) %>%
     filter(var %in% c("numkids.1", "numkids.2", "numkids.3plus", "Total")) %>%
     select(model, var, "Categorical" = chargap_crossgroup) %>%
     mutate(group = ifelse(var == "Total", "Total", "Fertility")) %>%
@@ -136,7 +152,7 @@ for(i in 1:10000){
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_timing[
-                             covariates_timing %!in% c(
+                             covariates_timing %!in% c(age, race, region,
                                ed, "married", laborsupply, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
@@ -145,12 +161,12 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "Demographic Controls"),
+      mutate(model = "Baseline"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_timing[
                              covariates_timing %!in% c(
-                               "married", laborsupply, jobchar)])["crossgroup"] %>%
+                               ed, laborsupply, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
              setNames(paste0("chargap_", .y))) %>%
@@ -158,7 +174,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Education"),
+      mutate(model = "+ Background"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_timing[
@@ -171,11 +187,11 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Marital Status"),
+      mutate(model = "+ Education"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_timing[
-                             covariates_timing %!in% jobchar])["crossgroup"] %>%
+                             covariates_timing %!in% c(wrkhrs, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
              setNames(paste0("chargap_", .y))) %>%
@@ -183,7 +199,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Labor Supply"),
+      mutate(model = "+ Work Experience and Job Tenure"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_timing)["crossgroup"] %>%
@@ -194,7 +210,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Job Characteristics")) %>%
+      mutate(model = "Full")) %>%
     filter(var %in% c("afb.cat_21minus", "afb.cat_23to27", "afb.cat_28plus", "Total")) %>%
     select(model, var, "Timing" = chargap_crossgroup) %>%
     mutate(group = ifelse(var == "Total", "Total", "Fertility")) %>%
@@ -205,7 +221,7 @@ for(i in 1:10000){
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cattiming[
-                             covariates_cattiming %!in% c(
+                             covariates_cattiming %!in% c(age, race, region,
                                ed, "married", laborsupply, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
@@ -214,12 +230,12 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "Demographic Controls"),
+      mutate(model = "Baseline"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cattiming[
                              covariates_cattiming %!in% c(
-                               "married", laborsupply, jobchar)])["crossgroup"] %>%
+                               ed, laborsupply, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
              setNames(paste0("chargap_", .y))) %>%
@@ -227,7 +243,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Education"),
+      mutate(model = "+ Background"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cattiming[
@@ -240,11 +256,11 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Marital Status"),
+      mutate(model = "+ Education"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cattiming[
-                             covariates_cattiming %!in% jobchar])["crossgroup"] %>%
+                             covariates_cattiming %!in% c(wrkhrs, jobchar)])["crossgroup"] %>%
       imap(~ .x %>%
              select("Characteristics Gap") %>%
              setNames(paste0("chargap_", .y))) %>%
@@ -252,7 +268,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Labor Supply"),
+      mutate(model = "+ Work Experience and Job Tenure"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates_cattiming)["crossgroup"] %>%
@@ -263,7 +279,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything()) %>%
       adorn_totals("row") %>%
-      mutate(model = "+ Job Characteristics")) %>%
+      mutate(model = "Full")) %>%
     filter(var %in% c("num.kids.cont",
                       "afb.cat_21minus", "afb.cat_23to27", "afb.cat_28plus",
                       "Total")) %>%
@@ -272,23 +288,95 @@ for(i in 1:10000){
     group_by(group, model) %>%
     summarise_if(is.numeric, funs(sum(., na.rm = TRUE)))
   
+  t3_40plus <- bind_rows(
+    decomposition_analysis(weights = weights, sample_conditions = sample_conditions_40plus, data = psid_imp2, 
+                           years = years, outcome = outcome, group = group,
+                           covariates = covariates[
+                             covariates %!in% c(age, race, region,
+                               ed, "married", laborsupply, jobchar)])["crossgroup"] %>%
+      imap(~ .x %>%
+             select("Characteristics Gap") %>%
+             setNames(paste0("chargap_", .y))) %>%
+      bind_cols() %>%
+      mutate(var = rownames(.)) %>%
+      dplyr::select(var, everything()) %>%
+      adorn_totals("row") %>%
+      mutate(model = "Baseline"),
+    decomposition_analysis(weights = weights, sample_conditions = sample_conditions_40plus, data = psid_imp2, 
+                           years = years, outcome = outcome, group = group,
+                           covariates = covariates[
+                             covariates %!in% c(
+                               ed, laborsupply, jobchar)])["crossgroup"] %>%
+      imap(~ .x %>%
+             select("Characteristics Gap") %>%
+             setNames(paste0("chargap_", .y))) %>%
+      bind_cols() %>%
+      mutate(var = rownames(.)) %>%
+      dplyr::select(var, everything()) %>%
+      adorn_totals("row") %>%
+      mutate(model = "+ Background"),
+    decomposition_analysis(weights = weights, sample_conditions = sample_conditions_40plus, data = psid_imp2, 
+                           years = years, outcome = outcome, group = group,
+                           covariates = covariates[
+                             covariates %!in% c(
+                               laborsupply, jobchar)])["crossgroup"] %>%
+      imap(~ .x %>%
+             select("Characteristics Gap") %>%
+             setNames(paste0("chargap_", .y))) %>%
+      bind_cols() %>%
+      mutate(var = rownames(.)) %>%
+      dplyr::select(var, everything()) %>%
+      adorn_totals("row") %>%
+      mutate(model = "+ Education"),
+    decomposition_analysis(weights = weights, sample_conditions = sample_conditions_40plus, data = psid_imp2, 
+                           years = years, outcome = outcome, group = group,
+                           covariates = covariates[
+                             covariates %!in% c(wrkhrs, jobchar)])["crossgroup"] %>%
+      imap(~ .x %>%
+             select("Characteristics Gap") %>%
+             setNames(paste0("chargap_", .y))) %>%
+      bind_cols() %>%
+      mutate(var = rownames(.)) %>%
+      dplyr::select(var, everything()) %>%
+      adorn_totals("row") %>%
+      mutate(model = "+ Work Experience and Job Tenure"),
+    decomposition_analysis(weights = weights, sample_conditions = sample_conditions_40plus, data = psid_imp2, 
+                           years = years, outcome = outcome, group = group,
+                           covariates = covariates)["crossgroup"] %>%
+      imap(~ .x %>%
+             select("Characteristics Gap") %>%
+             setNames(paste0("chargap_", .y))) %>%
+      bind_cols() %>%
+      mutate(var = rownames(.)) %>%
+      dplyr::select(var, everything()) %>%
+      adorn_totals("row") %>%
+      mutate(model = "Full")) %>%
+    filter(var %in% c("num.kids.cont",
+                      "afb.cat_21minus", "afb.cat_23to27", "afb.cat_28plus",
+                      "Total")) %>%
+    select(model, var, "40+" = chargap_crossgroup) %>%
+    mutate(group = ifelse(var == "Total", "Total", "Fertility")) %>%
+    group_by(group, model) %>%
+    summarise_if(is.numeric, funs(sum(., na.rm = TRUE)))
+  
   fert_decomp <- left_join(t3_cat, t3_timing, by = c("model", "group")) %>%
-    left_join(., t3_cattiming, by = c("model", "group"))
+    left_join(., t3_cattiming, by = c("model", "group")) %>%
+    left_join(., t3_40plus, by = c("model", "group"))
   
   # Stores results
   
-  saveRDS(fert_decomp, file = paste("bootstrap_tablea8/tablea8_bs_14.13.23_", i, ".RDS", sep = ""))
+  saveRDS(fert_decomp, file = paste("bootstrap_tablea8/tablea8_bs_23.12.20_", i, ".RDS", sep = ""))
   
   toc()
   
 }
 
 # List all .RDS files
-files <- list.files(path = "bootstrap_tablea7", pattern="*.RDS")
+files <- list.files(path = "bootstrap_tablea8", pattern="*.RDS")
 
 # Function to load .RDS files
 load_rds <- function(x){
-  readRDS(paste("bootstrap_tablea7", x, sep = "/"))
+  readRDS(paste("bootstrap_tablea8", x, sep = "/"))
 }
 
 # Load all .RDS files into a list of data frames
@@ -314,13 +402,23 @@ rownames(bootstrap) <- NULL
 bootstrap_table <- bootstrap %>% 
   select(Measure, Group, Model, everything()) %>% 
   mutate(Model = factor(Model, 
-                        levels = c("Demographic Controls",
+                        levels = c("Baseline", 
+                                   "+ Background", 
                                    "+ Education", 
-                                   "+ Marital Status", 
-                                   "+ Labor Supply",
-                                   "+ Job Characteristics"))) %>%
+                                   "+ Work Experience and Job Tenure",
+                                   "Full"))) %>%
   rename(fifth = "5%", ninetyfifth = "95%") %>%
   mutate(fifth = round(fifth * 100, digits = 2),
          ninetyfifth = round(ninetyfifth * 100, digits = 2))
 
 write_csv(bootstrap_table, "tables/bootstrap_tablea8.csv")
+
+
+# Checking that mdipoint between 5th and 95th percentiles approximates the point estimates
+ta8 <- read_csv("tables/tablea8.csv") %>%
+  gather(Measure, pointestimate, -c(Model, group)) %>%
+  mutate(Model = gsub("Model [0-9]+: ", "", Model)) %>%
+  rename(Group = group) %>%
+  left_join(., bootstrap_table,
+            by = c("Measure", "Group", "Model")) %>%
+  mutate(midpoint = (fifth + ninetyfifth) / 2)

@@ -2,7 +2,7 @@
 # PROJECT: KILLEWALD- GENDER WAGE DISTRIBUTION
 # FILE: ANALYSES, FIGURE A3
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 14/06/2023 (mdy)
+# LAST UPDATED: 12/29/2023 (mdy)
 #**********************************************************
 
 opts <- options(knitr.kable.NA = "")
@@ -72,7 +72,10 @@ race.mt1 <- with(design.mt1, svyglm(
     Black + Hispanic + Other +
     numkids.white + numkids.black + numkids.latino + numkids.other +
     married +
-    HighSchool  + SomeCollege  + ba.avdeg
+    HighSchool  + SomeCollege  + ba.avdeg +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 # Combining the regression results across imputations
@@ -93,7 +96,10 @@ race.mt2 <- with(design.mt2, svyglm(
     Black + Hispanic + Other +
     numkids.white + numkids.black + numkids.latino + numkids.other +
     married +
-    HighSchool  + SomeCollege  + ba.avdeg
+    HighSchool  + SomeCollege  + ba.avdeg +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 race.mt2 <- MIcombine((race.mt2))
@@ -110,7 +116,10 @@ race.ft1 <- with(design.ft1, svyglm(
     Black + Hispanic + Other +
     numkids.white + numkids.black + numkids.latino + numkids.other +
     married +
-    HighSchool  + SomeCollege  + ba.avdeg
+    HighSchool  + SomeCollege  + ba.avdeg +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 race.ft1 <- MIcombine((race.ft1))
@@ -128,7 +137,10 @@ race.ft2 <- with(design.ft2, svyglm(
     Black + Hispanic + Other +
     numkids.white + numkids.black + numkids.latino + numkids.other +
     married +
-    HighSchool  + SomeCollege  + ba.avdeg
+    HighSchool  + SomeCollege  + ba.avdeg +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 race.ft2 <- MIcombine((race.ft2))
@@ -149,7 +161,10 @@ marstat.mt1 <- with(design.mt1, svyglm(
     Northeast + Northcentral+ South +
     Black + Hispanic + Other  +
     numkids.mar + numkids.unmar + married +
-    HighSchool  + SomeCollege  + ba.avdeg
+    HighSchool  + SomeCollege  + ba.avdeg +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 marstat.mt1 <- MIcombine((marstat.mt1))
@@ -164,7 +179,10 @@ marstat.mt2 <- with(design.mt2, svyglm(
     Northeast + Northcentral+ South +
     Black + Hispanic + Other  +
     numkids.mar + numkids.unmar + married +
-    HighSchool  + SomeCollege  + ba.avdeg
+    HighSchool  + SomeCollege  + ba.avdeg +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 marstat.mt2 <- MIcombine((marstat.mt2))
@@ -180,7 +198,10 @@ marstat.ft1 <- with(design.ft1, svyglm(
     Northeast + Northcentral+ South +
     Black + Hispanic + Other  +
     numkids.mar + numkids.unmar + married +
-    HighSchool  + SomeCollege  + ba.avdeg
+    HighSchool  + SomeCollege  + ba.avdeg +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 marstat.ft1 <- MIcombine((marstat.ft1))
@@ -196,7 +217,10 @@ marstat.ft2 <- with(design.ft2, svyglm(
     Northeast + Northcentral+ South +
     Black + Hispanic + Other  +
     numkids.mar + numkids.unmar + married +
-    HighSchool  + SomeCollege  + ba.avdeg
+    HighSchool  + SomeCollege  + ba.avdeg +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 marstat.ft2 <- MIcombine((marstat.ft2))
@@ -217,7 +241,10 @@ ed.mt1 <- with(design.mt1, svyglm(
     Northeast + Northcentral+ South +
     Black + Hispanic + Other  +
     married +
-    numkids.hsless + numkids.morethanhs + hsandless
+    numkids.hsless + numkids.morethanhs + hsandless +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 ed.mt1 <- MIcombine((ed.mt1))
@@ -233,7 +260,10 @@ ed.mt2 <- with(design.mt2, svyglm(
     Northeast + Northcentral + South +
     Black + Hispanic + Other  +
     married +
-    numkids.hsless + numkids.morethanhs + hsandless
+    numkids.hsless + numkids.morethanhs + hsandless +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 ed.mt2 <- MIcombine((ed.mt2))
@@ -249,7 +279,10 @@ ed.ft1 <- with(design.ft1, svyglm(
     Northeast + Northcentral + South +
     Black + Hispanic + Other  +
     married +
-    numkids.hsless + numkids.morethanhs + hsandless
+    numkids.hsless + numkids.morethanhs + hsandless +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
 ))
 
 ed.ft1 <- MIcombine((ed.ft1))
@@ -265,7 +298,11 @@ ed.ft2 <- with(design.ft2, svyglm(
     Northeast + Northcentral + South +
     Black + Hispanic + Other  +
     married +
-    numkids.hsless + numkids.morethanhs + hsandless))
+    numkids.hsless + numkids.morethanhs + hsandless +
+    log.expf + emp.tenure + 
+    ftormore + overwork + union + govt.job + occ.pct.female + occ.managers + 
+    manuf
+  ))
 
 ed.ft2 <- MIcombine((ed.ft2))
 MIcombineP(ed.ft2)
@@ -345,13 +382,94 @@ marstat.coefplot <- marstat.coefs %>%
   ylim(-.15, .12)
 
 # Combining all subgroup plots into one plot
-p3 <- grid.arrange(
-  race.coefplot, ed.coefplot, marstat.coefplot, 
+p4 <- grid.arrange(
+  marstat.coefplot, race.coefplot, ed.coefplot,  
   nrow = 1, 
-  top = "Figure A3: Coefficients on Number of Children by Subgroup",
-  bottom = caption_grob
+  top = "Coefficients on Number of Children"#,
+  #bottom = caption_grob
 )
 
-# Saving subgroup plot
-ggsave(plot = p3, "figures/figa3.jpg", 
-       width = 12, height = 5, units = "in", device='jpeg', dpi=700)
+
+# Creating first panel of Figure A1, showing fertility decline by subgroup
+p1 <- psid_imp %>%
+  filter(year %in% c(1981, 1991, 2001, 2011, 2019)) %>%
+  group_by(year, female, .imp, married) %>% # For each year, sex, and imputation,
+  # Compute the weighted means for the variables below, using the weights specified in the function
+  dplyr::select(num.kids.cont, perwt) %>%
+  summarize_all(list(wmean = ~weighted.mean(., w = perwt))) %>% 
+  ungroup() %>%
+  dplyr::select(year, female, everything(), -c(.imp, perwt_wmean)) %>% # Ordering the columns
+  group_by(year, female, married) %>% # For each year and female, compute means mean across imputations
+  summarise_all(mean) %>%
+  mutate(Gender = ifelse(female == 1, "Women", "Men"),
+         group = ifelse(married == 1, "Married", "Unmarried")
+  ) %>%
+  ggplot(aes(x = year, y = num.kids.cont_wmean, color = group)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~Gender,  nrow = 2) +
+  theme_bw() +
+  theme(legend.position = "bottom",
+        panel.spacing = unit(2, "lines")) +
+  scale_color_manual(values=c("dodgerblue4", "darkgoldenrod2")) +
+  xlab("") +
+  ylab("") 
+
+p2 <-psid_imp %>%
+  filter(year %in% c(1981, 1991, 2001, 2011, 2019)) %>%
+  filter(race %in% c("White", "Black")) %>%
+  group_by(year, female, .imp, race) %>% # For each year, sex, and imputation,
+  # Compute the weighted means for the variables below, using the weights specified in the function
+  dplyr::select(num.kids.cont, perwt) %>%
+  summarize_all(list(wmean = ~weighted.mean(., w = perwt))) %>% 
+  ungroup() %>%
+  dplyr::select(year, female, everything(), -c(.imp, perwt_wmean)) %>% # Ordering the columns
+  group_by(year, female, race) %>% # For each year and female, compute means mean across imputations
+  summarise_all(mean) %>%
+  mutate(Gender = ifelse(female == 1, "Women", "Men"),
+         group = factor(race, levels = c("White", "Black")
+         )) %>%
+  ggplot(aes(x = year, y = num.kids.cont_wmean, color = group)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~Gender,  nrow = 2) +
+  theme_bw() +
+  scale_color_manual(values=c("darkgoldenrod2", "dodgerblue4")) +
+  theme(legend.position = "bottom",
+        panel.spacing = unit(2, "lines")) +
+  xlab("") +
+  ylab("Average Number of Children") 
+
+p3 <- psid_imp %>%
+  filter(year %in% c(1981, 1991, 2001, 2011, 2019)) %>%
+  mutate(ed.dummy = ifelse(yrs.ed.fam > 12, "> High School", "High School & Less")) %>%
+  group_by(year, female, .imp, ed.dummy) %>% # For each year, sex, and imputation,
+  # Compute the weighted means for the variables below, using the weights specified in the function
+  dplyr::select(num.kids.cont, perwt) %>%
+  summarize_all(list(wmean = ~weighted.mean(., w = perwt))) %>% 
+  ungroup() %>%
+  dplyr::select(year, female, everything(), -c(.imp, perwt_wmean)) %>% # Ordering the columns
+  group_by(year, female, ed.dummy) %>% # For each year and female, compute means mean across imputations
+  summarise_all(mean) %>%
+  mutate(Gender = ifelse(female == 1, "Women", "Men"),
+         group = ed.dummy
+  ) %>%
+  ggplot(aes(x = year, y = num.kids.cont_wmean, color = group)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(~Gender,  nrow = 2) +
+  theme_bw() +
+  scale_color_manual(values=c("darkgoldenrod2", "dodgerblue4")) +
+  theme(legend.position = "bottom",
+        panel.spacing = unit(2, "lines")) +
+  xlab("Year") +
+  ylab("") 
+
+figa2 <- grid.arrange(p1, p2, p3, nrow = 1, 
+                      top = "Average Number of Children")
+
+figa1 <- grid.arrange(figa2, p4, nrow = 2,
+                          top = "Figure A1: Subgroup Results, 1980-2018")
+
+ggsave(plot = figa1, "figures/figa1.jpg", 
+       width = 10.5, height = 12, units = "in", device='jpeg', dpi=700)

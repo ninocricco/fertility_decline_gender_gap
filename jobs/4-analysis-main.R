@@ -85,7 +85,8 @@ fig2 <- fig2_values %>%
         axis.text = element_text(size = 14),
         legend.text = element_text(size = 14),
         strip.text = element_text(size = 16),
-        legend.key.width=unit(3,"line")) +
+        legend.key.width=unit(3,"line"),
+        legend.title = element_text(size = 14)) +
   scale_x_continuous(breaks=c(1980, 1990, 2000, 2010, 2018)) +
   scale_color_manual(values=c("dodgerblue4", "darkgoldenrod2"), name="Gender")+
   scale_linetype_manual(values = c(3, 1), name = "Gender")
@@ -97,9 +98,9 @@ ggsave(plot = fig2, "figures/fig2.jpg",
 # Creating vector that sets the order of variables for tables
 order_vars <- c("(Intercept)", "wages.hrly", "num.kids.cont", "age", "agesq",
                 "White", "Black", "Hispanic", "Other", 
-                "Northeast", "Northcentral", "South", "West",
+                "Northeast", "Northcentral", "South", "West", "married",
                 "LessthanHS", "HighSchool", "SomeCollege", "ba.avdeg",
-                "married",  "expf", "log.expf", "emp.tenure", 
+                "expf", "log.expf", "emp.tenure", 
                 "ftormore","overwork",
                 "union", "govt.job", "manuf", "occ.pct.female", "occ.managers", 
                 "n")
@@ -132,9 +133,8 @@ knitr::kable(t1 %>% select(-estimate), booktabs = T, format = "latex",
            threeparttable = T) %>%
   pack_rows("Race", 7, 14, bold = F) %>%
   pack_rows("Region", 15, 22, bold = F) %>% 
-  pack_rows("Years of Education", 23, 30, bold = F) %>%
-  pack_rows("Labor Supply", 33, 40, bold = F) %>%
-  pack_rows("Job Characteristics", 41, 50, bold = F)
+  pack_rows("Years of Education", 24, 32, bold = F) %>%
+  pack_rows("Work Hours", 37, 40, bold = F)
 
 # We then generate an object that contains the regression coefficients for all models specified
 # in the main text. Several tables draw on this object, including the tables that create Table 2
@@ -196,11 +196,11 @@ kable(t2, booktabs = T, format = "latex",
   add_header_above(c(" ", "Men" = 2, "Women" = 2)) %>%
   footnote("Table shows coefficients for number of children from gender-and-year specific regressions on hourly wages. Standard errors are shown in parentheses. See text for details of the model specifications.",
            threeparttable = T) %>%
-  pack_rows("Model 1: Demographic Controls", 1, 3, bold = T) %>% 
-  pack_rows("Model 2: + Education", 4, 6, bold = T) %>% 
-  pack_rows("Model 3: + Marital Status", 7, 9, bold = T) %>% 
-  pack_rows("Model 4: + Labor Supply", 10, 12, bold = T) %>% 
-  pack_rows("Model 5: + Job Characteristics", 13, 15, bold = T)
+  pack_rows("Model 1: Baseline", 1, 3, bold = T) %>% 
+  pack_rows("Model 2: + Background", 4, 6, bold = T) %>% 
+  pack_rows("Model 3: + Education", 7, 9, bold = T) %>% 
+  pack_rows("Model 4: + Work Experience and Job Tenure", 10, 12, bold = T) %>% 
+  pack_rows("Model 5: Full", 13, 15, bold = T)
 
 # We then create a main decomposition object that maps our decomposition analysis function across each covariate list
 main_decomp <- mapply(perform_decomposition_analysis, covariates_to_exclude, model_labels, SIMPLIFY = FALSE) %>% 
@@ -232,11 +232,11 @@ kable(t3 %>% dplyr::select(Model, Variable, everything()) %>%
                Women = Women_CharGap) %>%
         dplyr::select(-c(Variable, Model)), booktabs = T, format = "latex", 
       caption = "Table 3: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, by Gender") %>%
-  pack_rows("Model 1: Demographic Controls", 1, 2, bold = T) %>% 
-  pack_rows("Model 2: + Education", 3, 4, bold = T) %>% 
-  pack_rows("Model 3: + Marital Status", 5, 6, bold = T) %>% 
-  pack_rows("Model 4: + Labor Supply", 7, 8, bold = T) %>% 
-  pack_rows("Model 5: + Job Characteristics", 9, 10, bold = T) %>%
+  pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
+  pack_rows("Model 2: + Background", 3, 4, bold = T) %>% 
+  pack_rows("Model 3: + Education", 5, 6, bold = T) %>% 
+  pack_rows("Model 4: + Work Experience and Job Tenure", 7, 8, bold = T) %>% 
+  pack_rows("Model 5: Full", 9, 10, bold = T) %>%
   footnote("Note: see text for details of model specifications", threeparttable = T)
 
 # Generating LaTex code to produce Table A3: Decomposition of % Change in Pay Gap Explained by Changing Characteristics, Returns, and Interactions
@@ -248,11 +248,11 @@ knitr::kable(main_decomp %>%
                              Women_Interaction, -Model),
              booktabs = T, format = "latex", 
              caption = "Table A3: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, Returns, and Interactions, by Gender") %>%
-  pack_rows("Model 1: Demographic Controls", 1, 2, bold = T) %>% 
-  pack_rows("Model 2: + Education", 3, 4, bold = T) %>% 
-  pack_rows("Model 3: + Marital Status", 5, 6, bold = T) %>% 
-  pack_rows("Model 4: + Labor Supply", 7, 8, bold = T) %>% 
-  pack_rows("Model 5: + Job Characteristics", 9, 10, bold = T) %>% 
+  pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
+  pack_rows("Model 2: + Background", 3, 4, bold = T) %>% 
+  pack_rows("Model 3: + Education", 5, 6, bold = T) %>% 
+  pack_rows("Model 4: + Work Experience and Job Tenure", 7, 8, bold = T) %>% 
+  pack_rows("Model 5: + Full", 9, 10, bold = T) %>% 
   add_header_above(c(" ", "Characteristics" = 3, "Returns" = 3, "Interactions" = 3)) %>%
   footnote("Note: see text for details of model specifications", threeparttable = T)
 
@@ -294,86 +294,20 @@ ta4 <- main_decomp %>%
 
 write_csv(ta4, "tables/tablea4.csv")
 
-kable(ta4 %>% dplyr::select(group, "Model 1: Demographic Controls_Total", 
-                            "Model 2: + Education_Total", "Model 3: + Marital Status_Total", 
-                            "Model 4: + Labor Supply_Total", "Model 5: + Job Characteristics_Total"), booktabs = T, format = "latex", 
+kable(ta4 %>% dplyr::select(group, "Model 1: Baseline_Total", 
+                            "Model 2: + Background_Total", "Model 3: + Education_Total", 
+                            "Model 4: + Work Experience and Job Tenure_Total", "Model 5: Full_Total"), booktabs = T, format = "latex", 
       caption = "Table A4: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, by Gender and Model, Detailed")
 
-kable(ta4 %>% dplyr::select(group, "Model 1: Demographic Controls_Men", 
-                            "Model 2: + Education_Men", "Model 3: + Marital Status_Men", 
-                            "Model 4: + Labor Supply_Men", "Model 5: + Job Characteristics_Men"), booktabs = T, format = "latex", 
+kable(ta4 %>% dplyr::select(group, "Model 1: Baseline_Men", 
+                            "Model 2: + Background_Men", "Model 3: + Education_Men", 
+                            "Model 4: + Work Experience and Job Tenure_Men", "Model 5: Full_Men"), booktabs = T, format = "latex", 
       caption = "Table A4: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, by Gender and Model, Detailed")
 
-kable(ta4 %>% dplyr::select(group, "Model 1: Demographic Controls_Women", 
-                            "Model 2: + Education_Women", "Model 3: + Marital Status_Women", 
-                            "Model 4: + Labor Supply_Women", "Model 5: + Job Characteristics_Women"), booktabs = T, format = "latex", 
+kable(ta4 %>% dplyr::select(group, "Model 1: Baseline_Women", 
+                            "Model 2: + Background_Women", "Model 3: + Education_Women", 
+                            "Model 4: + Work Experience and Job Tenure_Women", "Model 5: Full_Women"), booktabs = T, format = "latex", 
       caption = "Table A4: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, by Gender and Model, Detailed")
-
-# Generating decomposition objects for Table 4: Changing Gender Gap in Labor Supply
-
-expf_decomp <- decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = data, 
-                                      years = years, outcome = "expf", group = group,
-                                      covariates = covariates[covariates %!in% c(laborsupply, jobchar)])
-
-tenure_decomp <- decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = data, 
-                                        years = years, outcome = "emp.tenure", group = group,
-                                        covariates = covariates[covariates %!in% c(laborsupply, jobchar)])
-
-# Creating LaTex output for Table A10: Showing coefficient of number of children on labor supply measures
-ta10 <- bind_cols(expf_decomp$coefs %>% dplyr::select(year, female, estimate, exp = num.kids.cont), 
-                  tenure_decomp$coefs %>% select(tenure = num.kids.cont)) %>%
-  gather(numkidscoef, value, -c(year, female, estimate)) %>%
-  pivot_wider(names_from = c(year, female), values_from = value) %>%
-  mutate_if(is.numeric, round, digits = 4)
-
-write_csv(ta10, "tables/tablea10.csv")
-
-kable(ta10 %>% dplyr::select(ends_with("0"), everything(),
-                             -c(estimate, numkidscoef)), 
-      booktabs = T, format = "latex",
-      caption = "Table A10: Coefficients for Regressions of Labor Supply Measures on Number of Children by Gender, 1980-2019") %>%
-  add_header_above(c(" ", "Men" = 2, "Women" = 2)) %>%
-  pack_rows("Years of Full-time Experience", 1, 3, bold = T) %>% 
-  pack_rows("Employer Tenure", 4, 6, bold = T) %>%
-  footnote("Note: regressing labor supply outcomes on number of children, age, race, region, years of education, and marital status, as in Model 3 in the main specification. See text for details of model specifications.", threeparttable = T)
-
-
-# Creating LaTex output for Table 4: Decomposing the % Explained in Changing Labor Supply
-t4 <- bind_rows(expf_decomp[c("crossgroup", "group0", "group1")] %>%
-                  bind_cols() %>%
-                  mutate(var = rownames(.)) %>%
-                  dplyr::select(var, everything(), -starts_with("group")) %>%
-                  adorn_totals("row") %>%
-                  select(var, starts_with("Characteristics")) %>%
-                  rename(Variable = var, 
-                         Total_CharGap = "Characteristics Gap...1", 
-                         Men_CharGap = "Characteristics Gap...5",
-                         Women_CharGap = "Characteristics Gap...9") %>% 
-                  mutate_if(is.numeric, ~.*100) %>%
-                  mutate_if(is.numeric, round, digits = 2) %>%
-                  filter(Variable %in% c("num.kids.cont")),
-                tenure_decomp[c("crossgroup", "group0", "group1")] %>%
-                  bind_cols() %>%
-                  mutate(var = rownames(.)) %>%
-                  dplyr::select(var, everything(), -starts_with("group")) %>%
-                  adorn_totals("row") %>%
-                  select(var, starts_with("Characteristics")) %>%
-                  rename(Variable = var, 
-                         Total_CharGap = "Characteristics Gap...1", 
-                         Men_CharGap = "Characteristics Gap...5",
-                         Women_CharGap = "Characteristics Gap...9") %>% 
-                  mutate_if(is.numeric, ~.*100) %>%
-                  mutate_if(is.numeric, round, digits = 2) %>%
-                  filter(Variable %in% c("num.kids.cont")))
-
-write_csv(t4, "tables/table4.csv")
-
-kable(t4 %>% select(-Variable), booktabs = T, format = "latex", 
-      caption = "Table 4: Percent of the Changing Gender Gap in Labor Supply 1980-2018 Explained by Changing Fertility, by Gender") %>%
-  pack_rows("Years of Full-time Experience", 1, 1, bold = T) %>%
-  pack_rows("Employer Tenure", 2, 2, bold = T) %>%
-  footnote("Note: regressing labor supply outcomes on number of children, age, race, region, years of education, and marital status, as in Model 3 in the main specification. See text for details of model specifications.",
-           threeparttable = T)
 
 # Generating the across-decade decomposition object
 
@@ -411,27 +345,30 @@ ta5 <- decomp_decades %>%
                            var %in% region ~ "Region",
                            var %in% ed ~ "Education", 
                            var %in% marstat ~ "Marital Status",
-                           var %in% c("log.expf", "emp.tenure", 
-                                      "ftormore", "overwork") ~ "Labor Supply",
+                           var %in% c("log.expf", "emp.tenure") ~ "Work Experience",
+                           var %in% c("ftormore", "overwork") ~ "Work Hours (Categorical)",
                            var %in% c("union", "govt.job", "occ.pct.female", 
                                       "occ.managers", "manuf") ~ "Job Characteristics")) %>%
   group_by(group, model, year) %>% 
   summarise_if(is.numeric, funs(sum(., na.rm = TRUE))) %>%
   pivot_wider(names_from = c(year), values_from = "Characteristics.Gap") %>%
   mutate(group = factor(group, levels = c("Number of Children", "Age", "Race", "Region", 
-                                          "Education", "Marital Status", "Labor Supply",
+                                          "Marital Status", "Education", "Work Experience",
+                                          "Work Hours (Categorical)",
                                           "Job Characteristics"))) %>%
-  arrange(model, group) %>% ungroup() %>% dplyr::select(-model)
+  arrange(model, group) %>% ungroup() %>% #group_by(model) %>%
+  #summarise_if(is.numeric, funs(sum(., na.rm = TRUE))) %>%
+  select(-model)
 
 write_csv(ta5, "tables/tablea5.csv")
 
 kable(ta5, format = "latex", booktabs = T, 
       caption = "Table A5: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, By Decade") %>%
-  pack_rows("Model 1: Demographic Controls", 1, 4, bold = T) %>% 
-  pack_rows("Model 2: + Education", 5, 9, bold = T) %>%
-  pack_rows("Model 3: + Marital Status", 10, 15, bold = T) %>%
-  pack_rows("Model 4: + Labor Supply", 16, 22, bold = T) %>%
-  pack_rows("Model 5: + Job Characteristics", 23, 30, bold = T) %>%
+  pack_rows("Model 1: Baseline", 1, 1, bold = T) %>% 
+  pack_rows("Model 2: + Background", 2, 6, bold = T) %>%
+  pack_rows("Model 3: + Education", 7, 12, bold = T) %>%
+  pack_rows("Model 4: + Work Experience and Job Tenure", 13, 19, bold = T) %>%
+  pack_rows("Model 5: Full", 20, 28, bold = T) %>%
   footnote("Note: see text for details of model specifications.", threeparttable = T)
 
 # Creating Figure 3 looking at the across-decade decomposition, using the 
@@ -445,9 +382,9 @@ write_csv(fig3_values, "tables/fig3values.csv")
 fig3 <- fig3_values %>% 
   rename(decade = year) %>%
   mutate(model = factor(model, 
-                        levels = c("Model 1: Demographic Controls", "Model 2: + Education",
-                                   "Model 3: + Marital Status", "Model 4: + Labor Supply", 
-                                   "Model 5: + Job Characteristics"))) %>%
+                        levels = c("Model 1: Baseline", "Model 2: + Background",
+                                   "Model 3: + Education", "Model 4: + Work Experience and Job Tenure", 
+                                   "Model 5: Full"))) %>%
   ggplot(aes(x = model, y = Characteristics.Gap, fill = decade)) +
   geom_bar(position = position_stack(reverse = TRUE), stat = "identity") +
   labs(x = "", y = "% Change in Pay Gap Explained", 
@@ -544,7 +481,41 @@ p3 <- psid_imp %>%
   ylab("") 
 
 figa2 <- grid.arrange(p1, p2, p3, nrow = 1, 
-                      top = "Figure A2: Changes in Average Number of Children by Subgroup, 1980-2018")
+                      top = "Average Number of Children")
 
 ggsave(plot = figa2, "figures/figa2.jpg", 
        width = 10.5, height = 6, units = "in", device='jpeg', dpi=700)
+
+figa1_new <- grid.arrange(figa2, p4, nrow = 2,
+                          top = "Figure A1: Subgroup Results, 1980-2018")
+
+ggsave(plot = figa1_new, "figures/figa1_new.jpg", 
+       width = 10.5, height = 12, units = "in", device='jpeg', dpi=700)
+
+# New figure: Pay Gap trends by parity
+# Creating Figure A2, showing fertility decline by subgroup
+parityplot <- psid_imp %>%
+  filter(year %in% c(1981, 1991, 2001, 2011, 2019)) %>%
+  mutate(Gender = ifelse(female == 1, "Women", "Men"), 
+         year = year-1) %>%
+  group_by(year, Gender, .imp, num.kids.trunc) %>% # For each year, sex, and imputation,
+  # Compute the weighted means for the variables below, using the weights specified in the function
+  dplyr::select( wages.hrly, perwt) %>%
+  summarize_all(list(wmean = ~weighted.mean(., w = perwt))) %>% 
+  ungroup() %>%
+  dplyr::select(year, Gender, everything(), -c(.imp, perwt_wmean)) %>% # Ordering the columns
+  group_by(year, Gender, num.kids.trunc) %>% # For each year and female, compute means mean across imputations
+  summarise_all(mean) %>%
+  pivot_wider(names_from = Gender, values_from = wages.hrly_wmean) %>%
+  mutate(ratio = Women/Men) %>%
+  ggplot(aes(x = year, y = ratio, color = num.kids.trunc)) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  theme(legend.position = "bottom",
+        plot.title = element_text(hjust = 0.5, size = 15.5),       
+        panel.spacing = unit(2, "lines")) +
+  scale_color_manual(values=c("skyblue2", "dodgerblue1", "dodgerblue4", "blue4")) +
+  labs(title = "Gender Wage Gap by Parity") +
+  xlab("") +
+  ylab("")

@@ -78,13 +78,18 @@ figa4 <-
                       name = "Birth Cohort") +
   labs(title = "Figure A4: Changing Fertility and the Changing Gender Pay Gap, by Birth Cohort", 
        y = "", 
-       x = "",
-       caption = "Left panel shows average number of children born to date for women from different birth cohorts, by year. Right panel shows the unadjusted gender pay gap for the same cohorts and years.") +
+       x = "") +
   scale_x_continuous(breaks=c(1980, 1990, 2000, 2010, 2018)) +
-  theme(plot.title = element_text(hjust = 0.5, size = 14),
+  theme(plot.title = element_text(hjust = 0.5, size = 18), 
+        legend.position = "bottom",
         strip.background = element_blank(),
-        strip.placement = "outside", 
-        legend.position = "bottom") +
+        strip.placement = "outside",
+        axis.title = element_text(size = 14),
+        axis.text = element_text(size = 14),
+        legend.text = element_text(size = 14),
+        strip.text = element_text(size = 16),
+        legend.key.width=unit(3,"line"),
+        legend.title = element_text(size = 14)) +
   guides(linetype = "none", label = "none") 
 
 ggsave(plot = figa4, "figures/figa4.jpg", 

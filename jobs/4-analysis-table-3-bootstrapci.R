@@ -35,47 +35,55 @@ for(i in 1:10000){
   
   # Runs the main decomposition analysis
   
+  covariates_to_exclude <- list(
+    c(wrkhrs, jobchar),
+    c()
+  )
+  
+  
   main_decomp <- bind_rows(
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates[
-                             covariates %!in% c(
-                               ed, marstat, laborsupply, jobchar)])[c("crossgroup", "group0", "group1")] %>%
+                             covariates %!in% c(age, race, region, ed, marstat, wrkhrs, laborsupply, jobchar)
+                             ])[c("crossgroup", "group0", "group1")] %>%
       bind_cols() %>%
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything(), -starts_with("group")) %>%
       adorn_totals("row") %>%
-      mutate(model = "Model 1: Demographic Controls"),
+      mutate(model = "Model 1: Baseline"),
+    decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
+                           years = years, outcome = outcome, group = group,
+                           covariates = covariates[
+                             covariates %!in% c(ed, laborsupply, jobchar)
+                               ])[c("crossgroup", "group0", "group1")] %>%
+      bind_cols() %>%
+      mutate(var = rownames(.)) %>%
+      dplyr::select(var, everything(), -starts_with("group")) %>%
+      adorn_totals("row") %>%
+      mutate(model = "Model 2: + Background"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates[
                              covariates %!in% c(
-                               marstat, laborsupply, jobchar)])[c("crossgroup", "group0", "group1")] %>%
+                               laborsupply, jobchar)
+                             ])[c("crossgroup", "group0", "group1")] %>%
       bind_cols() %>%
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything(), -starts_with("group")) %>%
       adorn_totals("row") %>%
-      mutate(model = "Model 2: + Education"),
+      mutate(model = "Model 3: + Education"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates[
                              covariates %!in% c(
-                               laborsupply, jobchar)])[c("crossgroup", "group0", "group1")] %>%
+                               wrkhrs, jobchar)
+                               ])[c("crossgroup", "group0", "group1")] %>%
       bind_cols() %>%
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything(), -starts_with("group")) %>%
       adorn_totals("row") %>%
-      mutate(model = "Model 3: + Marital Status"),
-    decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
-                           years = years, outcome = outcome, group = group,
-                           covariates = covariates[
-                             covariates %!in% c(
-                               jobchar)])[c("crossgroup", "group0", "group1")] %>%
-      bind_cols() %>%
-      mutate(var = rownames(.)) %>%
-      dplyr::select(var, everything(), -starts_with("group")) %>%
-      adorn_totals("row") %>%
-      mutate(model = "Model 4: + Labor Supply"),
+      mutate(model = "Model 4: + Work Experience and Job Tenure"),
     decomposition_analysis(weights = weights, sample_conditions = sample_conditions, data = psid_imp2, 
                            years = years, outcome = outcome, group = group,
                            covariates = covariates)[c("crossgroup", "group0", "group1")] %>%
@@ -83,7 +91,7 @@ for(i in 1:10000){
       mutate(var = rownames(.)) %>%
       dplyr::select(var, everything(), -starts_with("group")) %>%
       adorn_totals("row") %>%
-      mutate(model = "Model 5: + Job Characteristics")) %>%
+      mutate(model = "Model 5: Full")) %>%
     dplyr::select(model, var, everything()) %>% 
     rename(Model = model, Variable = var, 
            Total_CharGap = "Characteristics Gap...2", 
@@ -98,7 +106,7 @@ for(i in 1:10000){
   
   # Stores results
   
-  saveRDS(main_decomp, file = paste("bootstrap_maindecomp/maindecomp_bs_14.13.23_", i, ".RDS", sep = ""))
+  saveRDS(main_decomp, file = paste("bootstrap_maindecomp_dec182023/maindecomp_bs_18.12.23_", i, ".RDS", sep = ""))
   
   toc()
   
@@ -112,11 +120,11 @@ for(i in 1:10000){
 #**********************************************************
 #
 # List all .RDS files
-files <- list.files(path = "bootstrap_maindecomp", pattern="*.RDS")
+files <- list.files(path = "bootstrap_maindecomp_dec182023", pattern="*.RDS")
 
 # Function to load .RDS files
 load_rds <- function(x){
-  readRDS(paste("bootstrap_maindecomp", x, sep = "/"))
+  readRDS(paste("bootstrap_maindecomp_dec182023", x, sep = "/"))
 }
 
 # Load all .RDS files into a list of data frames
@@ -141,11 +149,11 @@ rownames(bootstrap) <- NULL
 bootstrap_table <- bootstrap %>% 
   select(Quantity, Group, Component, Model, everything()) %>% 
   mutate(Model = factor(Model, 
-                        levels = c("Model 1: Demographic Controls", 
-                                   "Model 2: + Education", 
-                                   "Model 3: + Marital Status", 
-                                   "Model 4: + Labor Supply",
-                                   "Model 5: + Job Characteristics"))) %>%
+                        levels = c("Baseline", 
+                                   "+ Background", 
+                                   "+ Education", 
+                                   "+ Work Experience and Job Tenure",
+                                   "Full"))) %>%
   arrange(Model, Component, Group, Quantity) %>%
   rename(fifth = "5%", ninetyfifth = "95%") %>%
   mutate(fifth = round(fifth * 100, digits = 2),
@@ -160,8 +168,10 @@ write_csv(bootstrap_tablea3, "tables/bootstrap_tablea3.csv")
 # Checking that mdipoint between 5th and 95th percentiles approximates the point estimates
 ta3 <- read_csv("tables/tablea3.csv") %>%
   gather(key, pointestimate, -c(Variable, Model)) %>%
+  mutate(Model = gsub("Model [0-9]+: ", "", Model)) %>%
   separate(key, into = c("Group", "Component")) %>%
   left_join(., bootstrap_table %>%
-              rename(Variable = Quantity),
+              rename(Variable = Quantity) %>%
+              mutate(Component = ifelse(Component == "Chargap", "CharGap", Component)),
             by = c("Variable", "Group", "Component", "Model")) %>%
   mutate(midpoint = (fifth + ninetyfifth) / 2)

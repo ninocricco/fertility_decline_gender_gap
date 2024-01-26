@@ -53,18 +53,21 @@ The PSID also uses 2012 industry codes in some survey years, which are not inclu
 
 - `3-analysis_arguments.R`: Specifies arguments that are used repeatedly throughout the analysis pipeline
 - `4-analysis_main.R`: Runs the analyses for all tables and figures in the main text and ancillary appendix tables related to results from the main analyses.
+- `4-analysis_figure-a1.R`: Creates output for the first figure in the appendix showing fertility means and coefficients by subgroup
 - `4-analysis_table_a6.R`: Runs analyses for Table A6, change within decades
 - `4-analysis_table_a7.R`: Runs analyses for Table A7, using alternative sample specifications
 - `4-analysis_table_a8.R`: Runs analyses for Table A8, using alternative fertility measures
 - `4-analysis_table_a9.R`: Runs analyses for Table A9, using alternative reference years
-- `4-analysis_table_a11-13.R`: 
-- `4-analysis_fig_a3.R`:
-- `4-analysis_fig_a4.R`:
-- `4-analysis_table_2_ttest.R`:
-- `4-analysis_table_3_bootstrapci.R`:
-- `4-analysis_table_4_bootstrapci.R`:
-- `4-analysis_table_a8_bootstrapci.R`:
-- `5-analysis_formatting`: 
+- `4-analysis_table_a11-a12-a13.R`: Runs analyses for Tables A11-13, reweighting the sample by labor force selection
+- `4-analysis_table_3_bootstrapci.R`: Creates bootstrapped estimates for Table 3 and outputs confidence intervals
+- `4-analysis_table_a8_bootstrapci.R`: Creates bootstrapped estimates for Table A8 and outputs confidence intervals
+
+### Not in the paper
+- `5-analysis-cohabitation.R`: Splits marital status group into married-single-cohabiting and re-estimates the models
+- `5-analysis-cross-sectionaldecomp.R`: Decomposes the contribution of fertility differences in the cross-section
+- `5-analysis-talkfigures.R`: Outputs figures visualizing decomposition results for conference presentations (outdated)
+- `5-analysis-counterfactuals-wedge.R`: Creates analyses based on counterfactual decompositions distinguishing convergence from composition pathways (outdated)
+
 
 ## References
 
