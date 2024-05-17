@@ -73,9 +73,9 @@ write_csv(fig2_values, "tables/fig2values.csv")
 
 # Creates figure 2
 fig2 <- fig2_values %>%
-  ggplot(aes(y = value, x = year, color = Gender, linetype = Gender)) +
+  ggplot(aes(y = value, x = year, linetype = Gender)) +
   geom_point() +
-  geom_line(size = 1.3) +
+  geom_line() +
   theme_bw() + 
   labs(y = "Average Number of Children",
        title = "Figure 2: Fertility Decline, 1980-2018") +
@@ -88,8 +88,7 @@ fig2 <- fig2_values %>%
         legend.key.width=unit(3,"line"),
         legend.title = element_text(size = 14)) +
   scale_x_continuous(breaks=c(1980, 1990, 2000, 2010, 2018)) +
-  scale_color_manual(values=c("dodgerblue4", "darkgoldenrod2"), name="Gender")+
-  scale_linetype_manual(values = c(3, 1), name = "Gender")
+  scale_linetype_manual(values = c(2, 1), name = "Gender")
 
 # Saves figure 2 to the directory
 ggsave(plot = fig2, "figures/fig2.jpg", 
@@ -400,7 +399,7 @@ fig3 <- fig3_values %>%
         plot.caption = element_text(size = 12, face = "italic"),
         legend.text = element_text(size = 13),
         strip.text = element_text(size = 15)) +
-  scale_fill_manual(values=c("skyblue2", "dodgerblue1", "dodgerblue4", "blue4"))
+  scale_fill_manual(values=c("grey70", "grey50", "grey37", "grey15"))
 
 ggsave(plot = fig3, "figures/fig3.jpg",
        width = 15, height = 8, units = "in", device='jpeg', dpi=700)

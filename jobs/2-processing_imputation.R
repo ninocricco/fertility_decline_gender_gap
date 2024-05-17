@@ -1,14 +1,13 @@
-#**********************************************************
-# PROJECT: KILLEWALD- GENDER WAGE DISTRIBUTION
+#------------------------------------------------------------------------------
+# PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
 # FILE: PSID WIDE IMPUTATION
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 08/01/2022 (dmy)
-#**********************************************************
+#------------------------------------------------------------------------------
 
 # Loading helper functions
 # Loading helper functions
-source("jobs/functions.R")
-source("jobs/libraries.R")
+source("jobs/0-functions.R")
+source("jobs/0-libraries.R")
 
 psid <- read_csv("clean_data/psid_clean.csv") %>%
   # We set wages for both the main timing and the alternate timing
@@ -22,9 +21,9 @@ psid <- read_csv("clean_data/psid_clean.csv") %>%
   dplyr::select(-c(starts_with("lead"), family.id68, person.number68, family.id,
                    military, agriculture))
 
-#**********************************************************
+#------------------------------------------------------------------------------
 # IMPUTATION
-#**********************************************************
+#------------------------------------------------------------------------------
 
 # Creating a vector of variables that will later be converted to factors
 factor.vars <- c("indiv.id", "samp_error_stratum", "samp_error_cluster", 
@@ -76,7 +75,7 @@ init <- mice(period1, maxit = 0, method = "cart", seed = 500) # Set classificati
 meth <- init$method # Sets the method of imputation for each column
 predM <- init$predictorMatrix # Establishes the predictor matrix
 # Setting id and weight variables in the predictor matrix to zero so that they don't affect the imputation
-predM[, c("indiv.id", "perwt_1980", "perwt_1981")]= 0 
+predM[, c("indiv.id", "perwt_1980", "perwt_1981", "perwt.long_1980", "perwt.long_1981")]= 0 
 predM[, c("occ2010_1980", "occ2010_1981",
           "occ.orig_1980", "occ.orig_1981",
           "ind.orig_1980", "ind.orig_1981",
@@ -117,7 +116,7 @@ init <- mice(period2, maxit = 0, method = "cart", seed = 500) # Set classifficat
 meth <- init$method # Sets the method of imputation for each column
 predM <- init$predictorMatrix # Establishes the predictor matrix
 # Setting id and weight variables in the predictor matrix to zero so that they don't affect the imputation
-predM[, c("indiv.id", "perwt_1990", "perwt_1991")]= 0 
+predM[, c("indiv.id", "perwt_1990", "perwt_1991", "perwt.long_1990", "perwt.long_1991")]= 0 
 predM[, c("occ2010_1990", "occ2010_1991",
           "occ.orig_1990", "occ.orig_1991", "ind.orig_1990", "ind.orig_1991", "ind1990_1990", "ind1990_1991", 
           "num.kids.trunc_1990", "num.kids.trunc_1991", "dummy.afb.synth_1990", "dummy.afb.synth_1991",
@@ -155,7 +154,7 @@ init <- mice(period3, maxit = 0, method = "cart", seed = 500) # Set classifficat
 meth <- init$method # Sets the method of imputation for each column
 predM <- init$predictorMatrix # Establishes the predictor matrix
 # Setting id and weight variables in the predictor matrix to zero so that they don't affect the imputation
-predM[, c("indiv.id", "perwt_1999", "perwt_2001")]= 0 
+predM[, c("indiv.id", "perwt_1999", "perwt_2001", "perwt.long_1999", "perwt.long_2001")]= 0 
 predM[, c("occ2010_1999", "occ2010_2001",
           "occ.orig_1999", "occ.orig_2001", "ind.orig_1999", "ind.orig_2001", "ind1990_1999", "ind1990_2001", 
           "num.kids.trunc_1999", "num.kids.trunc_2001", "dummy.afb.synth_1999", "dummy.afb.synth_2001",
@@ -194,7 +193,7 @@ init <- mice(period4, maxit = 0, method = "cart", seed = 500) # Set classifficat
 meth <- init$method # Sets the method of imputation for each column
 predM <- init$predictorMatrix # Establishes the predictor matrix
 # Setting id and weight variables in the predictor matrix to zero so that they don't affect the imputation
-predM[, c("indiv.id", "perwt_2009", "perwt_2011")]= 0 
+predM[, c("indiv.id", "perwt_2009", "perwt_2011", "perwt.long_2009", "perwt.long_2011")]= 0 
 predM[, c("occ2010_2009", "occ2010_2011",
           "occ.orig_2009", "occ.orig_2011", "ind.orig_2009", "ind.orig_2011", "ind1990_2009", "ind1990_2011", 
           "num.kids.trunc_2009", "num.kids.trunc_2011", "dummy.afb.synth_2009", "dummy.afb.synth_2011",
@@ -231,7 +230,7 @@ init <- mice(period5, maxit = 0, method = "cart", seed = 500) # Set classifficat
 meth <- init$method # Sets the method of imputation for each column
 predM <- init$predictorMatrix # Estbalishes the predictor matrix
 # Setting id and weight variables in the predictor matrix to zero so that they don't affect the imputation
-predM[, c("indiv.id", "perwt_2017", "perwt_2019")]= 0 
+predM[, c("indiv.id", "perwt_2017", "perwt_2019", "perwt.long_2017", "perwt.long_2019")]= 0 
 predM[, c("occ2010_2017", "occ2010_2019",
           "occ.orig_2017", "occ.orig_2019", "ind.orig_2017", "ind.orig_2019", "ind1990_2017", "ind1990_2019", 
           "num.kids.trunc_2017", "num.kids.trunc_2019", "dummy.afb.synth_2017", "dummy.afb.synth_2019",
@@ -264,6 +263,10 @@ df_imp.cart <- rbind(implong.p1, implong.p2, implong.p3, implong.p4, implong.p5)
 write_csv(df_imp.cart, "clean_data/psid_imputed.csv")
 rm(df_imp.cart)
 
+#------------------------------------------------------------------------------
+# CREATING FINAL CLEAN DATA FILE FROM IMPUTATIONS
+#------------------------------------------------------------------------------
+
 # Reading imputed data back in
 df_imp.cart <- read_csv("clean_data/psid_imputed.csv")
 
@@ -275,7 +278,7 @@ psid_imp <- df_imp.cart %>%
     # For race: in the imputation model, race is only ever imputed for one of two years in the same 
     # "period" (so either 2017 or 1980) as the "wide" values for each year are the same. This means that
     # there are some missings in the imputed race data for some respondents in a given year: for one
-    # respondent in 1980 and for 61 respondents in 2017. For these individuals, we use their assinged
+    # respondent in 1980 and for 61 respondents in 2017. For these individuals, we use their assigned
     # race in the imputed data in the alternate year in the period (so for the 61 missing cases in 2017, 
     # we asssign the imputed race in 2015 in that imputed dataset: for the 1 missing case in 1980, we 
     # assign the imputed race in 1981 in that imputed dataset
@@ -327,13 +330,12 @@ psid_imp <- df_imp.cart %>%
   # Normalizing weights within year
   mutate(perwt_nonzero = ifelse(perwt == 0, NA, perwt)) %>%
   group_by(year) %>%
-  mutate(perwt = ifelse(perwt != 0, perwt/mean(perwt_nonzero, na.rm = T),
-                        perwt)) %>%
-  filter(perwt > 0)
+  mutate(perwt_norm = ifelse(perwt != 0, perwt/mean(perwt_nonzero, na.rm = T),
+                        perwt))
 
 # Creates income top-code by year and joins back to main data, 
 # creates top-coded income measure
-psid_noimp <- psid_imp %>%
+psid_imputed_final <- psid_imp %>%
   filter(samp.inc.final == 1) %>% 
   group_by(year) %>%
   summarise(topcode = wtd.quantile(lnhrlywage, weight = perwt, probs = .99), 
@@ -344,7 +346,7 @@ psid_noimp <- psid_imp %>%
   filter(.imp > 0)
 
 # Saving the final data object as a .csv file
-write_csv(psid_noimp, "clean_data/psid_final.csv")
+write_csv(psid_imputed_final, "clean_data/psid_final.csv")
 
 missing_rates <- psid_imp %>% 
   filter(.imp == 0, samp.inc.final == 1, year %in% c(1981, 2019)) %>%

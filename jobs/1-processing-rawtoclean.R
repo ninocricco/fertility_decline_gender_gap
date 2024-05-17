@@ -1,18 +1,17 @@
-#********************************************************
+#------------------------------------------------------------------------------
 # PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
 # FILE: CREATES PRE-IMPUTATION ANALYTIC DATA FROM THE RAW PSID AND IPUMS DATA
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 08/01/2023 (mdy)
-#********************************************************
+#------------------------------------------------------------------------------
 
-# Loading helper functions
+# Loading libraries and helper functions
 source("jobs/0-functions.R")
 source("jobs/0-libraries.R")
 
 
-#**********************************************************
+#------------------------------------------------------------------------------
 # LOADING AND CLEANING DATA
-#**********************************************************
+#------------------------------------------------------------------------------
 
 # First loading both crosswalks for occupation and industry codes
 # Integrated industry and occupations crosswalk gathered from IPUMS
@@ -24,7 +23,8 @@ source("jobs/0-libraries.R")
 # Resource for occ codes in PSID codebook that are not included in crosswalk: 
 #   https://www.bls.gov/cps/cenocc2010.htm
 
-crosswalk.occ <- read_xlsx("raw_data/crosswalks/ipums_occ_crosswalk.xlsx") %>%
+crosswalk.occ <- read_xlsx(
+  "raw_data/crosswalks/ipums_occ_crosswalk.xlsx") %>%
   rename(occ2010 = "OCC2010", 
          occlab = 'Occupation category description',
          occ1970 = '1970',
@@ -33,7 +33,8 @@ crosswalk.occ <- read_xlsx("raw_data/crosswalks/ipums_occ_crosswalk.xlsx") %>%
 
 # For industry crosswalk: ind1990 tab in the IPUMS integrated crosswalk
 
-crosswalk.ind <- read_xlsx("raw_data/crosswalks/ipums_industry_crosswalk.xlsx") %>%
+crosswalk.ind <- read_xlsx(
+  "raw_data/crosswalks/ipums_industry_crosswalk.xlsx") %>%
   rename(ind1990 = IND1990, 
          indlab = 'Industry category description',
          ind1970 = '1970',
@@ -44,16 +45,27 @@ crosswalk.ind <- read_xlsx("raw_data/crosswalks/ipums_industry_crosswalk.xlsx") 
 # at the time of writing: 
 #   https://www2.census.gov/programs-surveys/demo/guidance/industry-occupation/industry-crosswalk-90-00-02-07-12.xls
 
-crosswalk.ind.2012 <- read_xlsx("raw_data/crosswalks/census_industry_crosswalk_2012.1990.xlsx") %>%
+crosswalk.ind.2012 <- read_xlsx(
+  "raw_data/crosswalks/census_industry_crosswalk_2012.1990.xlsx") %>%
   rename(ind1990 = "1990 Census", 
          indlab = "Census 2012 Category Title",
          ind2012 = "2012 Census Code")
 
-# Both gathers values from the PSID raw file and transforms/recodes values in the process
-# Note: Once downloading the data cart from the PSID's online portal, the data file must be generated in stata.
-# The stata do-file automatically generated from the PSID must be edited to reflect the file path where the data is stored
-# After running the do-file on stata, save file as "psid.dta" in stata 11/12 format in the "raw_data/psid" directory
-psid_raw <- read.dta("raw_data/psid/psid.dta") %>% 
+#------------------------------------------------------------------------------
+# MAIN PSID DATA
+#------------------------------------------------------------------------------
+
+# Both gathers values from the PSID raw file and transforms/recodes values in 
+# the process
+# Note: Once downloading the data cart from the PSID's online portal, the data ]
+# file must be generated in stata.The stata do-file automatically generated
+# from the PSID must be edited to reflect the file path where data is stored
+# After running the do-file on stata, save file as "psid.dta" in stata 11/12
+# format in the "raw_data/psid" directory
+
+data <- read.dta("raw_data/psid/psid.dta") 
+
+psid_raw <- data %>% 
   transmute(
     family.id68 = ER30001, # 1968 interview number
     person.number68 = ER30002, # 1968 person number
@@ -82,6 +94,10 @@ psid_raw <- read.dta("raw_data/psid/psid.dta") %>%
     perwt_1980 = ER30342, perwt_1981 = ER30372, perwt_1990 = ER30688, perwt_1991 = ER30732, 
     perwt_1999 = ER33547, perwt_2001 = ER33639, perwt_2009 = ER34046, perwt_2011 = ER34155, 
     perwt_2015 = ER34414, perwt_2017 = ER34651, perwt_2019 = ER34864,
+    # Weighting variable for longitudinal weights 
+    perwt.long_1980 = ER30342, perwt.long_1981 = ER30372, perwt.long_1990 = ER30688, perwt.long_1991 = ER30732, 
+    perwt.long_1999 = ER33546, perwt.long_2001 = ER33637, perwt.long_2009 = ER34045, perwt.long_2011 = ER52436, 
+    perwt.long_2015 = ER65492, perwt.long_2017 = ER71570, perwt.long_2019 = ER34863,
     # Relationship to head- coding as head/RP, wife/SP
     # if any other value for rel head (incl. zero values), coded as "other" 
     rel.head_1980 = case_when(ER30315 == 1 ~ "head", ER30315 == 2 ~ "wife", TRUE ~ "other"), 
@@ -712,35 +728,14 @@ psid_raw <- read.dta("raw_data/psid/psid.dta") %>%
     # Creating indicator variable labeling whether respondent is head or wife in that year
     hd.wife = ifelse(rel.head %in% c("head", "wife"), 1, 0))
 
-
-# Creating a plot that identifies the proportion of respondents aged 20-65 in 
-# each year who are PSID heads or wives
-
-fig_a1 <- psid_raw %>% 
-  filter(age >= 20 & age <= 65) %>%
-  filter(year %in% c(1981, 2019)) %>%
-  mutate(Gender = ifelse(female == 1, "Women", "Men")) %>%
-  group_by(year, age, Gender) %>%
-  summarise(wtd.pct = wpct(hd.wife, weight = perwt)[2] * 100) %>%
-  ggplot(aes(x = age, y = wtd.pct, linetype = Gender)) +
-  geom_line() + 
-  facet_wrap(~year) +
-  theme_bw() +
-  labs(title = "Figure A1: Percent of PSID Sample Members Classified as Heads/Wives, by year and age",
-       y = "Percent of Sample Members Head/Wife (weighted)",
-       x = "Age") +
-  theme_bw() +
-  theme(plot.title = element_text(hjust = 0.5, size = 15.5), legend.position = "bottom",
-        axis.title = element_text(size = 12),
-        axis.text = element_text(size = 12))
-
-ggsave(plot = fig_a1, "figures/fig_a1.jpg", 
-       width = 10, height = 7, units = "in", device='jpeg', dpi=700)
+#------------------------------------------------------------------------------
+# MARITAL STATUS USING HOUSEHOLD ROSTER TO IDENTIFY COHABITORS
+#------------------------------------------------------------------------------
 
 # We then create a new object using the household roster to create
 # an alternative measure of marital status that distinguishes cohabitors
 
-psid_hhroster <- read.dta("raw_data/psid/psid.dta") %>% 
+psid_hhroster <- data %>% 
   transmute(
     family.id68 = ER30001, # 1968 interview number
     person.number68 = ER30002, # 1968 person number
@@ -841,7 +836,7 @@ psid_clean <- psid_raw %>%
   # Selecting variables at the individual-person level (all vars apply to R- if R is head, var takes value for head)
   dplyr::select(family.id68, person.number68, samp.error.stratum, samp.error.cluster, family.id, cds.indicator,
                 indiv.id, female, year, samp.inc.1981, samp.inc.2017, samp.inc.1991, samp.inc.2001, samp.inc.2011, latino.sample,
-                imm.sample.97, imm.sample.17, imm.sample, missing.interview, perwt, age, rel.head, marstat.hd, numkids.fu, 
+                imm.sample.97, imm.sample.17, imm.sample, missing.interview, perwt, perwt.long, age, rel.head, marstat.hd, numkids.fu, 
                 racehd, region, ann.wrk.hrs, govt.job, housework, ind.orig, ind1990,
                 occ.orig, occ2010, self.emp, union, wages, yrs.ed.fam, emp.tenure, empstat,
                 age.first.birth, age.youngest, faminc, hd.wife) %>%
@@ -880,6 +875,10 @@ psid_clean <- psid_raw %>%
       TRUE ~ 0)) %>%
   # Joining marital status according to HH roster data
   left_join(., marstat_hhroster, by = c("family.id", "year"))
+
+#------------------------------------------------------------------------------
+# MARITAL STATUS MARITAL HISTORY FILES
+#------------------------------------------------------------------------------
 
 # Generating marital history from the marital history files
 # The marital history files contain one record for each individual in the PSID since 1985
@@ -978,7 +977,7 @@ psid_mar <- read.dta("raw_data/psid_marital/psid_marital.dta") %>%
     # marriage as not yet married. If the marriage start date is before the end of our wage year and the "last date"
     # variable above (indicating when the marriage was dissolved, if dissolved by last obs period) is before
     # the end of our wage year, we code this marriage as the status of that marriage as of the last obs period:
-    # If the marriage start date is before the end of our wage yeear, but the dissolution date is after the end
+    # If the marriage start date is before the end of our wage year, but the dissolution date is after the end
     # of our wage year, then we code this record as "still married" during our wage year
     status.marriage_1980 = ifelse(status.marriage == "never.married", "never.married", ifelse(
       marriagedate > mdy("12-31-1979"), "notyet.married", ifelse(
@@ -1099,6 +1098,10 @@ benchmark.mar <- left_join(psid_clean, psid_mar, by = c("indiv.id", "year")) %>%
            TRUE ~ NA_character_))
 
 rm(psid_mar)
+
+#------------------------------------------------------------------------------
+# CREATING DATA ON RACE BASED ON ALL AVAILABLE RACE MEASURES EVER REPORTED
+#------------------------------------------------------------------------------
 
 # Creating data on ever reported race, using heads & wives' individual race and ethnicity
 # reports starting in 1985. Prior to 1985, race data was only collected on household heads: race
@@ -1370,6 +1373,10 @@ psid_obs <- benchmark.mar %>%
   mutate(race = ifelse(is.na(race.ever), racehd, race.ever))
 
 rm(benchmark.mar, psid_race, psid_race_ever)
+
+#------------------------------------------------------------------------------
+# CREATING WORK EXPERIENCE VARIABLES USING YEARLY HOURS WORKED & REPORTED EXP
+#------------------------------------------------------------------------------
 
 # Generating the work experience variables using yearly hours worked & reported experience variables
 psid_exp <- read.dta("raw_data/psid/psid.dta") %>%
@@ -1705,6 +1712,10 @@ benchmark.exp <- psid_exp.clean.2 %>%
 
 rm(psid_exp, psid_exp.clean, psid_exp.clean.2)
 
+#------------------------------------------------------------------------------
+# FERTILITY USING FERTILITY HISTORY FILES
+#------------------------------------------------------------------------------
+
 # Generating fertility variables using the fertility history data
 # Fertility history data has an id for each child 
 psid_fert <- read_xlsx("raw_data/psid_fertility/J295915.xlsx") %>%
@@ -1949,7 +1960,11 @@ benchmark.fert.final <- benchmark.fert.synth %>%
 
 rm(benchmark.fert.synth, test3)
 
-# Joining marital status data with the rest of our observed data
+#------------------------------------------------------------------------------
+# CLEANED PSID DATA
+#------------------------------------------------------------------------------
+
+# Joining with the rest of our observed data
 benchmark.final <- benchmark.fert.final %>%
   mutate(
     # Creating additional categorical variables
@@ -1975,7 +1990,7 @@ benchmark.final <- benchmark.fert.final %>%
       occ2010 <= 3650, 1, 0))) %>%
   dplyr::select(indiv.id, year, female, family.id68, person.number68, family.id, cds.indicator, samp.error.stratum, samp.error.cluster,
                 samp.inc.1981, samp.inc.2017, imm.sample.97, imm.sample.17, imm.sample, latino.sample, missing.interview,
-                perwt, age, lead.age, rel.head, marstat.hd, numkids.fu, race, region, lead.region, yrs.ed.fam,
+                perwt, perwt.long, age, lead.age, rel.head, marstat.hd, numkids.fu, race, region, lead.region, yrs.ed.fam,
                 ann.wrk.hrs, lead.ann.wrk.hrs,   wrk.pos, wrk.ft, wrk.pt, expt, expf, govt.job, union,
                 self.emp, ind.orig, ind1990, manuf, occ.orig, occ2010, occ.managers, wages, lead.wage, emp.tenure, military, agriculture, num.children,
                 num.children.hd, num.children.synth, dummy.nkids.synth, num.kids.trunc, age.first.birth, afb,
@@ -1985,9 +2000,14 @@ benchmark.final <- benchmark.fert.final %>%
 
 rm(benchmark.fert.final)
 
+#------------------------------------------------------------------------------
+# CREATING OCCUPATIONAL CHARACTERISTICS USING IPUMS DATA
+#------------------------------------------------------------------------------
+
 # Loading data from IPUMS files to merge in occupational characteristics
-# NOTE: To load data, you must download both the extract's data and the DDI and also set the working directory to 
-# the folder with these files (or change the path below).
+# NOTE: To load data, you must download both the extract's data and the DDI and
+# also set the working directory to the folder with these files 
+# (or change the path below).
 
 if (!require("ipumsr")) stop(
   "Reading IPUMS data into R requires the ipumsr package. 
@@ -2080,5 +2100,8 @@ benchmark.ipums <- crossing(occ2010 = ipums.data$occ2010,
     samp.inc.final = ifelse(samp.exc.mil.ag != 1 & samp.exc.selfemp != 1 & samp.exc.region != 1 &
                               samp.exc.zerowage != 1 & samp.inc.age == 1 & ann.wrk.hrs > 0,
                             1, 0))
-# Save data file to the clean data folder
+
+#------------------------------------------------------------------------------
+# SAVE FILE TO THE CLEAN DATA FOLDER
+#------------------------------------------------------------------------------
 write_csv(benchmark.ipums, "clean_data/psid_clean.csv")

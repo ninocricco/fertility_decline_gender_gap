@@ -1,9 +1,10 @@
-#********************************************************
+#------------------------------------------------------------------------------
 # PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
 # FILE: CREATES FUNCTIONS USED THROUGHOUT THE DATA ANALYSIS PIPELINE
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 12/06/2023 (dmy)
-#********************************************************
+#------------------------------------------------------------------------------
+# JANITORIAL FUNCTIONS FOR DATA CLEANING
+#------------------------------------------------------------------------------
 
 # This function does the opposite of %in% - works as an inverse selector
 '%!in%' <- function(x,y)!('%in%'(x,y))
@@ -26,10 +27,17 @@ MIcombineP <- function(MIcombineRes,digits=3) {
   round(2*pt(-abs(tStat),df=MIcombineRes$df),digits)
 }
 
-# This functions takes as arguments the data, years, filtering conditions for the data,
-# a vector of covariates, a vector naming an outcome, and a vector naming weights 
-# and generates a table with weighted means of all covariates and the outcome for each year
-# To see an example of the arguments/change them, see 3-analysis-arguments.R in replication file
+#------------------------------------------------------------------------------
+# FUNCTION GENERATING MEANS TABLE
+#------------------------------------------------------------------------------
+
+# This functions takes as arguments the data, years, filtering conditions for 
+# the data, a vector of covariates, a vector naming an outcome, and a vector 
+# naming weights and generates a table with weighted means of all covariates
+# and the outcome for each year
+
+# To see an example of the arguments/change them,
+# see 3-analysis-arguments.R in replication file
 generate_means_year_table <- function(data, 
                                       years,
                                       sample_conditions,
@@ -42,7 +50,8 @@ generate_means_year_table <- function(data,
   
   
   # Create a single combined expression for the filtering conditions
-  conditions_expr <- glue::glue("({paste(sample_conditions, collapse = ') & (')})")
+  conditions_expr <- glue::glue(
+    "({paste(sample_conditions, collapse = ') & (')})")
   
   # Filtering the data according to the conditions in the argument
   data <- data %>%
@@ -56,13 +65,15 @@ generate_means_year_table <- function(data,
     dplyr::select(rlang::sym(outcome), all_of(covariates), weights) %>%
     summarise(across(
       everything(),
-      list(mean = ~wtd.mean(., w = !!weights_sym), sd = ~sqrt(wtd.var(., w = !!weights_sym))), # Updated here
+      list(
+        mean = ~wtd.mean(., w = !!weights_sym), 
+        sd = ~sqrt(wtd.var(., w = !!weights_sym))),
       .names = "{col}_w{fn}"
     )) %>%
     mutate("(Intercept)" = 1) %>%
     filter(.imp != 0) %>%
     dplyr::select(year, female, "(Intercept)", everything()) %>%
-    dplyr::select(-c(.imp, perwt_wmean, perwt_wsd)) %>%
+    dplyr::select(-c(.imp, perwt_norm_wmean, perwt_norm_wsd)) %>%
     ungroup() %>%
     group_by(year, female) %>%
     summarise_all(mean) %>%
@@ -79,11 +90,15 @@ generate_means_year_table <- function(data,
   return(means.year_table)
 }
 
-# This functions takes as arguments the data, years, filtering conditions for the data,
-# a vector of covariates, a vector naming an outcome, a vector naming weights, and a 
-# vector specifying a group id and generates a table with weighted coefficients 
-# regressing the outcome on all covariates for each year, separately by group
-# To see an example of the arguments/change them, see 3-analysis-arguments.R in replication file
+#------------------------------------------------------------------------------
+# FUNCTION GENERATING REGRESSION COEFFICIENT TABLE
+#------------------------------------------------------------------------------
+
+# This functions takes as arguments the data, years, filtering conditions
+# for the data, a vector of covariates, a vector naming an outcome, a vector 
+# naming weights, and a vector specifying a group id and generates a table 
+# with weighted coefficientS regressing the outcome on all covariates for 
+# each year, separately by group
 generate_regression_table <- function(data,
                                       years,
                                       sample_conditions,
@@ -93,7 +108,8 @@ generate_regression_table <- function(data,
                                       outcome) {
   
   # Filters the data according to the conditions provided
-  conditions_expr <- glue::glue("({paste(sample_conditions, collapse = ') & (')})")
+  conditions_expr <- glue::glue(
+    "({paste(sample_conditions, collapse = ') & (')})")
   data <- data %>%
     mutate(samp.inc = ifelse(eval(parse(text = conditions_expr)), 1, 0)) %>%
     filter(samp.inc == 1)
@@ -116,17 +132,20 @@ generate_regression_table <- function(data,
     formula <- reformulate(covariates, response = outcome)
   
     # If the data is imputed (length(imp_data > 1)), runs a weighted 
-    # regression using the survey design object and combines the results across imputations
-    # If data is not imputed or contains a single imputation, runs weighted regression
-    # using the survey design object 
+    # regression using the survey design object and combines the results 
+    # across imputations
+    # If data is not imputed or contains a single imputation, 
+    # runs weighted regression using the survey design object 
     if (inherits(imp_data, "imputationList") && length(imp_data) > 1) {
-      design <- svydesign(ids = ~0, data = imp_data, weights = ~perwt, nest = T)
+      design <- svydesign(
+        ids = ~0, data = imp_data, weights = ~perwt_norm, nest = T)
       model <- with(design, svyglm(formula))
       model <- MIcombine(model)
       p_values <- MIcombineP(model)
       se_values <- vcov::se(model)
     } else {
-      design <- svydesign(ids = ~0, data = imp_data[[1]], weights = ~perwt, nest = T)
+      design <- svydesign(
+        ids = ~0, data = imp_data[[1]], weights = ~perwt_norm, nest = T)
       model <- svyglm(formula, design = design)
       t_stat <- coef(model) / survey::SE(model)
       p_values <- 2 * pt(-abs(t_stat), df = df.residual(model))
@@ -135,7 +154,9 @@ generate_regression_table <- function(data,
     
     # Combines results in a single table 
     result <- bind_rows(coef(model), se_values, p_values) %>%
-      mutate(year = year_iter, !!sym(group) := group_val, estimate = c("coef", "se", "p_value"))
+      mutate(year = year_iter, 
+             !!sym(group) := group_val, 
+             estimate = c("coef", "se", "p_value"))
     
     return(result)
   }
@@ -144,7 +165,8 @@ generate_regression_table <- function(data,
   for (year_iter in years) {
     for (group_val_iter in unique(data[[group]])) {
       imp_data <- designs[[paste0("design_", group_val_iter, "_", year_iter)]]
-      model_result <- run_model(imp_data, year_iter = year_iter, group_val = group_val_iter)
+      model_result <- run_model(
+        imp_data, year_iter = year_iter, group_val = group_val_iter)
       coef_name <- paste0("coef_", group_val_iter, "_", year_iter)
       regression.coefs[[coef_name]] <- model_result
     }
@@ -154,6 +176,11 @@ generate_regression_table <- function(data,
   return(regression.coefs)
 }
 
+
+#------------------------------------------------------------------------------
+# FUNCTION GENERATING CHARACTERISTICS COMPONENT OF THE DECOMPOSITION ANALYSIS
+#------------------------------------------------------------------------------
+
 # This functions takes as arguments the data, years, filtering conditions for the data,
 # a vector of covariates, a vector naming an outcome, a vector naming weights, a vector 
 # specifying a scale, and a vector specifying a group id and generates a table with the characteristics
@@ -162,7 +189,9 @@ generate_regression_table <- function(data,
 # means and coefficient tables, though if those are not provided it will call the functions that 
 # create the means table and the regression coefficients table
 # To see an example of the arguments/change them, see 3-analysis-arguments.R in replication file
-characteristics_component <- function(data, group, years, outcome, covariates, weights, sample_conditions, scale = "percent", means_year_obj = NULL, baseline_coefs_obj = NULL) {
+characteristics_component <- function(data, group, years, outcome, covariates, weights, 
+                                      sample_conditions, scale = "percent", 
+                                      means_year_obj = NULL, baseline_coefs_obj = NULL) {
   
   # This section tells the function to use the prespecified means and coefficients
   # tables if provided- if not, it generates them 
@@ -230,6 +259,9 @@ characteristics_component <- function(data, group, years, outcome, covariates, w
               "group1" = char_baseline_1 %>% mutate(group = "group1")))
 }
 
+#------------------------------------------------------------------------------
+# FUNCTION GENERATING THE RETURNS COMPONENT OF THE DECOMPOSITION ANALYSIS
+#------------------------------------------------------------------------------
 
 # This functions takes as arguments the data, years, filtering conditions for the data,
 # a vector of covariates, a vector naming an outcome, a vector naming weights, a vector 
@@ -304,6 +336,11 @@ returns_component <- function(data, group, years, outcome, covariates,
               "group0" = returns_baseline_0 %>% mutate(group = "group0"),
               "group1" = returns_baseline_1 %>% mutate(group = "group1")))
 }
+
+
+#------------------------------------------------------------------------------
+# FUNCTION GENERATING THE INTERACTION COMPONENT OF THE DECOMPOSITION ANALYSIS
+#------------------------------------------------------------------------------
 
 # As with the other two components, this functions takes as arguments the data, 
 # years, filtering conditions for the data, a vector of covariates, a vector naming an outcome, 
@@ -385,10 +422,15 @@ interactions_component <- function(data, group, years, outcome, covariates,
               "group1" = interaction_baseline_1 %>% mutate(group = "group1")))
 }
 
-# This function combines the same code used across all the separate component funtions into 
+
+
+
+
+# This function combines the same code used across all the separate component functions into 
 # one function.
-decomposition_analysis <- function(data, group, years, outcome, covariates,
-                                   weights, sample_conditions, scale = "percent",
+decomposition_analysis <- function(data = data, group, years, outcome, covariates,
+                                   weights, sample_conditions,
+                                   scale = "percent",
                                    means_year_obj = NULL, baseline_coefs_obj = NULL) {
   
   if (is.null(means_year_obj)) {

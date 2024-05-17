@@ -13,8 +13,9 @@ sample_conditions = list("samp.inc.age == 1",
                          "samp.exc.selfemp != 1", 
                          "samp.exc.region != 1",
                          "samp.exc.zerowage != 1", 
-                         "ann.wrk.hrs > 0")
-weights = "perwt"
+                         "ann.wrk.hrs > 0",
+                         "perwt > 0")
+weights = "perwt_norm"
 outcome = "lnhrlywage"
 group = "female"
 covariates = c("num.kids.cont", "age", "agesq",
@@ -52,3 +53,4 @@ model_labels <- c("Model 1: Baseline",
                   "Model 3: + Education", 
                   "Model 4: + Work Experience and Job Tenure",
                   "Model 5: Full")
+
