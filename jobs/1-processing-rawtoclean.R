@@ -69,13 +69,10 @@ psid_raw <- data %>%
   transmute(
     family.id68 = ER30001, # 1968 interview number
     person.number68 = ER30002, # 1968 person number
-    samp.error.stratum = ER31996, # PSID Sampling error variable- strata
-    samp.error.cluster = ER31997, # PSID Sampling error variable- cluster
     indiv.id = paste(family.id68, person.number68, sep ="_"), # unique individual identifier
     female = ifelse(ER32000 == 1, 0, ifelse(ER32000 == 2, 1, NA)), # identifying sex
     year.firstbornchild = ifelse(ER32024 == 9999, NA, ER32024), # birth year for respondents' first or only child
     yr.born = ifelse(ER34506 %in% c(0, 9999), NA, ER34506), 
-    cds.indicator = ER33418,
     family.id_1980 = ER30313, family.id_1981 = ER30343,
     family.id_1990 = ER30642, family.id_1991 = ER30689,
     family.id_1999 = ER33501, family.id_2001 = ER33601, 
@@ -173,26 +170,6 @@ psid_raw <- data %>%
     ann.wrk.hrs_hd_2015 = ER65156, ann.wrk.hrs_wf_2015 = ER65177,
     ann.wrk.hrs_hd_2017 = ER71233, ann.wrk.hrs_wf_2017 = ER71254,
     ann.wrk.hrs_hd_2019 = ER77255, ann.wrk.hrs_wf_2019 = ER77276,
-    # Housework
-    # In early years, housework is top coded at 98: in later years, we manually topcode values >98 to 98 for consistency
-    housework_hd_1980 = na_if(V7266, 99), housework_wf_1980 = na_if(V7265, 99),
-    housework_hd_1981 = na_if(V7957, 99), housework_wf_1981 = na_if(V7956, 99),
-    housework_hd_1990 = na_if(V18698, 99), housework_wf_1990 = na_if(V18697, 99), # Note: topcode in 90-91 is 84
-    housework_hd_1991 = na_if(V19998, 99), housework_wf_1991 = na_if(V19997, 99), 
-    housework_hd_1999 = na_codes(ER14230, c(0.5, 998, 999)), housework_hd_1999 = case_when(housework_hd_1999 >= 98 ~ 98, TRUE ~ housework_hd_1999), 
-    housework_wf_1999 = na_codes(ER14229, c(998, 999)), housework_wf_1999 = case_when(housework_wf_1999 >= 98 ~ 98, TRUE ~ housework_wf_1999), 
-    housework_hd_2001 = na_codes(ER18359, c(998, 999, .3, .5)), housework_hd_2001 = case_when(housework_hd_2001 >= 98 ~ 98, TRUE ~ housework_hd_2001), 
-    housework_wf_2001 = na_codes(ER18357, c(998, 999)), housework_wf_2001 = case_when(housework_wf_2001 >= 98 ~ 98, TRUE ~ housework_wf_2001), 
-    housework_hd_2009 = na_codes(ER42646, c(998, 999)), housework_hd_2009 = case_when(housework_hd_2009 >= 98 ~ 98, TRUE ~ housework_hd_2009), 
-    housework_wf_2009 = na_codes(ER42644, c(998, 999)), housework_wf_2009 = case_when(housework_wf_2009 >= 98 ~ 98, TRUE ~ housework_wf_2009), 
-    housework_hd_2011 = na_codes(ER47964, c(998, 999)), housework_hd_2011 = case_when(housework_hd_2011 >= 98 ~ 98, TRUE ~ housework_hd_2011), 
-    housework_wf_2011 = na_codes(ER47962, c(998, 999)), housework_wf_2011 = case_when(housework_wf_2011 >= 98 ~ 98, TRUE ~ housework_wf_2011), 
-    housework_hd_2015 = na_codes(ER60691, c(998, 999)), housework_hd_2015 = case_when(housework_hd_2015 >= 98 ~ 98, TRUE ~ housework_hd_2015), 
-    housework_wf_2015 = na_codes(ER60689, c(998, 999)), housework_wf_2015 = case_when(housework_wf_2015 >= 98 ~ 98, TRUE ~ housework_wf_2015), 
-    housework_hd_2017 = na_codes(ER66714, c(998, 999)), housework_hd_2017 = case_when(housework_hd_2017 >= 98 ~ 98, TRUE ~ housework_hd_2017), 
-    housework_wf_2017 = na_codes(ER66727, c(998, 999)), housework_wf_2017 = case_when(housework_wf_2017 >= 98 ~ 98, TRUE ~ housework_wf_2017),
-    housework_hd_2019 = na_codes(ER72718, c(998, 999)), housework_hd_2019 = case_when(housework_hd_2019 >= 98 ~ 98, TRUE ~ housework_hd_2019), 
-    housework_wf_2019 = na_codes(ER72731, c(998, 999)), housework_wf_2019 = case_when(housework_wf_2019 >= 98 ~ 98, TRUE ~ housework_wf_2019),
     # Occupation
     # Note that in 1980, the PSID has two sets of occupation and industry values- one set is using a PSID-generated 
     # scheme for those employed, unemployed, and retired, and a different set is recoded to the census occupation scheme. 
@@ -636,18 +613,7 @@ psid_raw <- data %>%
     wages_wf_2011 = ER52249 * 0.764 * 1.507,
     wages_hd_2015 = NA, wages_wf_2015 = NA,
     wages_hd_2017 = ER71293 * 0.694 * 1.507, wages_wf_2017 = ER71321 * 0.694 * 1.507, 
-    wages_hd_2019 = ER77315 * 0.663 * 1.507, wages_wf_2019 = ER77343 * 0.663 * 1.507, 
-    faminc_1980 = V7412 * 2.295 * 1.507,
-    faminc_1981 = V8065 * 2.022 * 1.507,
-    faminc_1990 = V18875 * 1.344 * 1.507,
-    faminc_1991 = V20175 * 1.275 * 1.507,
-    faminc_1999 = ER16462* 1.022 * 1.507,
-    faminc_2001 = ER20456 * 0.967 * 1.507, 
-    faminc_2009 = ER46935 * 0.774 * 1.507,
-    faminc_2011 = ER52343 * 0.764 * 1.507,
-    faminc_2015 = ER65349 * 0.704 * 1.507,
-    faminc_2017 = ER71426 * 0.694 * 1.507,
-    faminc_2019 = ER77448 * 0.663 * 1.507,
+    wages_hd_2019 = ER77315 * 0.663 * 1.507, wages_wf_2019 = ER77343 * 0.663 * 1.507,
     # Employer Tenure: not available in 1980, but collected in 1981- 1991 as number of months
     emp.tenure_hd_1980 = NA, emp.tenure_wf_1980 = NA,
     emp.tenure_hd_1981 = ifelse(V7711 == 999, NA, V7711), emp.tenure_wf_1981 = ifelse(V7884 == 999, NA, V7884),
@@ -690,16 +656,13 @@ psid_raw <- data %>%
                               & rel.head_2001 %in% c("head", "wife") & age_2001 %in% seq(30, 55, 1)~ 1, TRUE ~ 0),
     samp.inc.2011 = case_when(int.num_2011 > 0 & seq.num_2011 <= 20 & seq.num_2011 != 0 
                               & rel.head_2011 %in% c("head", "wife") & age_2011 %in% seq(30, 55, 1) ~ 1, TRUE ~ 0),
-    samp.inc.2017 = case_when(int.num_2017 > 0 & seq.num_2017 <= 20 & seq.num_2017 != 0 
-                              & rel.head_2017 %in% c("head", "wife") & age_2017 %in% seq(30, 55, 1)~ 1, TRUE ~ 0),
     samp.inc.2019 = case_when(int.num_2019 > 0 & seq.num_2019 <= 20 & seq.num_2019 != 0 
                               & rel.head_2019 %in% c("head", "wife") & age_2019 %in% seq(30, 55, 1)~ 1, TRUE ~ 0)) %>%
   # Turning to long format where key = varname for all vars except time-constant variables
   # (Sex, 1968 household and person numbers and individual identifier)
-  gather(key, value, -c(family.id68, person.number68, indiv.id, cds.indicator,
-                        samp.error.stratum, samp.error.cluster, female, yr.born,
+  gather(key, value, -c(family.id68, person.number68, indiv.id, female, yr.born,
                         year.firstbornchild, samp.inc.1981, samp.inc.1991, 
-                        samp.inc.2001, samp.inc.2011, samp.inc.2017, samp.inc.2019)) %>%
+                        samp.inc.2001, samp.inc.2011, samp.inc.2019)) %>%
   # Creating year variable based on the covariate label
   mutate(
     year = case_when(grepl("_1980", key) ~ 1980, grepl("_1981", key) ~ 1981, 
@@ -713,76 +676,15 @@ psid_raw <- data %>%
     # (families in the Latino sample are not included in our target years)
     imm.sample.97 =  ifelse(family.id68 >= 3001 & family.id68 <= 3511, 1, 0),
     imm.sample.17 = ifelse(family.id68 >= 4001 & family.id68 <= 4851, 1, 0),
-    latino.sample = ifelse(family.id68 >= 7001 & family.id68 <= 9308, 1, 0),
-    imm.sample = ifelse(imm.sample.97 == 1 | imm.sample.17 == 1, 1, 0)) %>%
+    latino.sample = ifelse(family.id68 >= 7001 & family.id68 <= 9308, 1, 0)) %>%
   dplyr::select(-key) %>%
   # Grouping by individual id
   group_by(indiv.id) %>%
   # Turning data back to wide format, each record is a person-year
   spread(var, value, convert = T) %>%
   mutate(
-    # Creating an indicator variable for whether the respondent was a non-interview or not a 
-    # head/wife in that year, meaning the PSID will not have collected covariate data for R in that year
-    missing.interview = case_when(int.num == 0 | seq.num > 20 | seq.num == 0 |
-                                    rel.head %!in% c("head", "wife") ~ 1, TRUE ~ 0),
     # Creating indicator variable labeling whether respondent is head or wife in that year
     hd.wife = ifelse(rel.head %in% c("head", "wife"), 1, 0))
-
-#------------------------------------------------------------------------------
-# MARITAL STATUS USING HOUSEHOLD ROSTER TO IDENTIFY COHABITORS
-#------------------------------------------------------------------------------
-
-# We then create a new object using the household roster to create
-# an alternative measure of marital status that distinguishes cohabitors
-
-psid_hhroster <- data %>% 
-  transmute(
-    family.id68 = ER30001, # 1968 interview number
-    person.number68 = ER30002, # 1968 person number
-    indiv.id = paste(family.id68, person.number68, sep ="_"), # unique individual identifier
-    female = ifelse(ER32000 == 1, 0, ifelse(ER32000 == 2, 1, NA)), # identifying sex
-    # Wave-specific unique family interview identifier (sometimes called interview number)
-    family.id_1980 = ER30313, family.id_1981 = ER30343,
-    family.id_1990 = ER30642, family.id_1991 = ER30689,
-    family.id_1999 = ER33501, family.id_2001 = ER33601, 
-    family.id_2009 = ER34001, family.id_2011 = ER34101,
-    family.id_2017 = ER34501, family.id_2019 = ER34701, 
-    # Wave-specific sequence number
-    seq.num_1980 = ER30314, seq.num_1981 = ER30344, seq.num_1990 = ER30643, seq.num_1991 = ER30690,
-    seq.num_1999 = ER33502, seq.num_2001 = ER33602, seq.num_2009 = ER34002, seq.num_2011 = ER34102, 
-    seq.num_2017 = ER34502, seq.num_2019 = ER34702, 
-    rel.head_1980 = ER30315, rel.head_1981 = ER30345, 
-    rel.head_1990 = ER30644, rel.head_1991 = ER30691, 
-    rel.head_1999 = ER33503, rel.head_2001 = ER33603, 
-    rel.head_2009 = ER34003, rel.head_2011 = ER34103, 
-    # For these years, the PSID changes the coding from head/wife to head/spouse. We only use the 
-    # head/wife/spouse labels to assign the individual the correct variables- that is, heads are assigned
-    # information collected about heads, wives/spouses information about wives/spouses, but do not 
-    # otherwise rely on these indicators for any analyses. 
-    rel.head_2017 = ER34503, rel.head_2019 = ER34703) %>%
-  # Turning to long format where key = varname for all vars except time-constant variables
-  # (Sex, 1968 household and person numbers and individual identifier)
-  gather(key, value, -c(family.id68, person.number68, indiv.id, female)) %>%
-  separate(key, into = c("key", "year"), sep = "_") %>%
-  mutate(year = as.numeric(year)) %>%
-  pivot_wider(names_from = "key", values_from = "value")
-
-marstat_hhroster <- psid_hhroster %>% 
-  # Creating measures to identify whether there are spouses or cohabitors in the 
-  # household roster. From 1990 (in our target years) onwards, the PSID identifies
-  # cohabitors with a separate code (rel.head == 20 for cohabitors of 1+ years and 
-  # code 88 for cohabitors < 1 year.Before 1990, we identify cohabitors/wives 
-  # according to whether a wife is present in this measure.
-  mutate(mar.hhroster = ifelse(year >= 1990 & 
-                                 rel.head == 20 & 
-                                 seq.num %in% c(1:20), 1, ifelse(
-                                   year < 1990 & rel.head == 2 &
-                                     seq.num %in% c(1:20), 1, 0)), 
-         cohab.hhroster = ifelse(year >= 1990 & rel.head %in% c(22, 88) &
-                                   seq.num %in% c(1:20), 1, ifelse(year < 1990, NA, 0))) %>%
-  group_by(family.id, year) %>%
-  summarise(mar.hhroster = sum(mar.hhroster), 
-            cohab.hhroster = sum(cohab.hhroster))
 
 # Creating a version of the data where we limit observations to individuals who are observed 
 # as heads or wives in our outcome years
@@ -798,7 +700,6 @@ psid_clean <- psid_raw %>%
   mutate(empstat = ifelse(rel.head == "head", empstat_hd, empstat_wf),
          ann.wrk.hrs = ifelse(rel.head == "head", ann.wrk.hrs_hd, ann.wrk.hrs_wf),
          govt.job = ifelse(rel.head == "head", govt.job_hd, govt.job_wf),
-         housework = ifelse(rel.head == "head", housework_hd, housework_wf),
          ind.orig = ifelse(rel.head == "head", ind_hd, ind_wf), 
          occ.orig = ifelse(rel.head == "head", occ_hd, occ_wf), 
          ind1990  = ifelse(rel.head == "head", ind1990_hd, ind1990_wf),
@@ -834,12 +735,13 @@ psid_clean <- psid_raw %>%
          # Adding zeros in front of industry codes that have less than 3 digits
          ind1990 = as.numeric(str_pad(ind1990, 3, pad = "0"))) %>%
   # Selecting variables at the individual-person level (all vars apply to R- if R is head, var takes value for head)
-  dplyr::select(family.id68, person.number68, samp.error.stratum, samp.error.cluster, family.id, cds.indicator,
-                indiv.id, female, year, samp.inc.1981, samp.inc.2017, samp.inc.1991, samp.inc.2001, samp.inc.2011, latino.sample,
-                imm.sample.97, imm.sample.17, imm.sample, missing.interview, perwt, perwt.long, age, rel.head, marstat.hd, numkids.fu, 
-                racehd, region, ann.wrk.hrs, govt.job, housework, ind.orig, ind1990,
+  dplyr::select(family.id68, person.number68, family.id,
+                indiv.id, female, year, 
+                latino.sample, imm.sample.97, imm.sample.17, perwt, perwt.long, 
+                age, rel.head, marstat.hd, numkids.fu, 
+                racehd, region, ann.wrk.hrs, govt.job, ind.orig, ind1990,
                 occ.orig, occ2010, self.emp, union, wages, yrs.ed.fam, emp.tenure, empstat,
-                age.first.birth, age.youngest, faminc, hd.wife) %>%
+                age.first.birth, age.youngest, hd.wife) %>%
   arrange(indiv.id, year) %>% # Arrange by year and individual id to create lead terms
   group_by(indiv.id) %>% # Group by id to create lead terms
   # Creating lead terms which will be used to create sample selection variables
@@ -853,28 +755,31 @@ psid_clean <- psid_raw %>%
   mutate(# Creating a measure for whether individuals work in a manufacturing industry 
     # (durable or non-durable), using original industry labels in 1980 and 
     # harmonized industry labels for subsequent years
-    manuf = case_when(year == 1980 & ind.orig %in% c(40:46, 85, 30:34, 49) ~ 1, 
-                      year != 1980 & ind1990 %in% 
-                        c(100, 101, 102, 110, 111, 112, 120, 121, 122, 130, 132, 140, 141,
-                          142, 150, 151, 152, 160, 161, 162, 171, 172, 180, 181, 182, 190, 
-                          191, 192, 200, 201, 210, 211, 212, 220, 221, 222, 230, 231, 232, 
-                          241, 242, 250, 251, 252, 261, 262, 270, 271, 272, 280, 281, 282, 
-                          290, 291, 292, 300, 301, 310, 311, 312, 320, 321, 322, 331, 332,
-                          340, 341, 342, 350, 351, 352, 360, 361, 362, 370, 371, 372, 380,
-                          381, 390, 391, 392) ~ 1, 
-                      TRUE ~ 0), 
+    manuf = ifelse(
+      year == 1980 & is.na(ind.orig), NA, ifelse(
+        year == 1980 & ind.orig %in% c(40:46, 85, 30:34, 49), 1, ifelse(
+          year != 1980 & is.na(ind1990), NA, ifelse(
+            year != 1980 & ind1990 %in% 
+              c(100, 101, 102, 110, 111, 112, 120, 121, 122, 130, 132, 140,
+                141, 142, 150, 151, 152, 160, 161, 162, 171, 172, 180, 181,
+                182, 190, 191, 192, 200, 201, 210, 211, 212, 220, 221, 222,
+                230, 231, 232, 241, 242, 250, 251, 252, 261, 262, 270, 271,
+                272, 280, 281, 282, 290, 291, 292, 300, 301, 310, 311, 312,
+                320, 321, 322, 331, 332, 340, 341, 342, 350, 351, 352, 360,
+                361, 362, 370, 371, 372, 380, 381, 390, 391, 392), 1, 0)))), 
     # Creating a measure of whether an individual works in agriculture for sample selection
     agriculture = case_when(# Coding as agriculture when:
       year %in% c(1980, 1990, 1999, 2009, 2015, 2017) & lead.ind1990 %in% c(10, 11, 30, 31, 32, 230) ~ 1, 
       year %in% c(1981, 1991, 2001, 2011, 2019) & ind1990 %in% c(10, 11, 30, 31, 32, 230) ~ 1, 
-      TRUE ~ 0),
+      TRUE ~ 0), # codes missing as non-agriculture- we do not impute bc we use for sample selection
     # Following similar procedure as for agriculture for military
     military = case_when(
       year %in% c(1980, 1990, 1999, 2009, 2015, 2017) & lead.ind1990 %in% c(940, 941, 942, 950, 951, 952, 960) ~ 1, 
       year %in% c(1981, 1991, 2001, 2011, 2019) & ind1990 %in% c(940, 941, 942, 950, 951, 952, 960) ~ 1,
-      TRUE ~ 0)) %>%
-  # Joining marital status according to HH roster data
-  left_join(., marstat_hhroster, by = c("family.id", "year"))
+      TRUE ~ 0))
+
+write_csv(psid_clean, "clean_data/intermediate_psid_clean.csv")
+print("Done with: Main Data file")
 
 #------------------------------------------------------------------------------
 # MARITAL STATUS MARITAL HISTORY FILES
@@ -1086,19 +991,12 @@ benchmark.mar <- left_join(psid_clean, psid_mar, by = c("indiv.id", "year")) %>%
   # Creating measures of marital status
   mutate(married = case_when(marstat == "married" ~ 1, 
                              is.na(marstat) & marstat.hd == "married" ~ 1,
-                             TRUE ~ 0), 
-         marstat.cohab = case_when(
-           marstat == "married" ~ "married",
-           is.na(marstat) & marstat.hd == "married" ~ "married",
-           year < 1990 & mar.hhroster == 1 ~ "cohabiting",
-           year >= 1990 & mar.hhroster == 1 ~ "cohabiting",
-           year >= 1990 & cohab.hhroster == 1 ~ "cohabiting",
-           complete.cases(marstat) ~ marstat,
-           rel.head == "head" ~ marstat.hd,
-           TRUE ~ NA_character_))
+                             TRUE ~ 0))
+
+write_csv(psid_mar, "clean_data/intermediate_psid_clean_mar.csv")
+print("Done with: Merging Marital History to Main File")
 
 rm(psid_mar)
-
 #------------------------------------------------------------------------------
 # CREATING DATA ON RACE BASED ON ALL AVAILABLE RACE MEASURES EVER REPORTED
 #------------------------------------------------------------------------------
@@ -1373,6 +1271,9 @@ psid_obs <- benchmark.mar %>%
   mutate(race = ifelse(is.na(race.ever), racehd, race.ever))
 
 rm(benchmark.mar, psid_race, psid_race_ever)
+
+write_csv(psid_obs, "clean_data/intermediate_psid_clean_mar_race.csv")
+print("Done with: Merging Race to Main, Marital History File")
 
 #------------------------------------------------------------------------------
 # CREATING WORK EXPERIENCE VARIABLES USING YEARLY HOURS WORKED & REPORTED EXP
@@ -1699,7 +1600,6 @@ psid_exp.clean.2 <- psid_exp.clean %>%
   mutate(expt = cumsum(yrswrk_final),
          expf = cumsum(yrswrk.ft_final))
 
-
 # This final object restricts the object above to our target outcome and covariate years and merges 
 # the experience data to the rest of our outcome/covariate data. 
 benchmark.exp <- psid_exp.clean.2 %>%
@@ -1711,6 +1611,9 @@ benchmark.exp <- psid_exp.clean.2 %>%
          expt = ifelse(expt > age-17 & age !=0, age-17, expt))
 
 rm(psid_exp, psid_exp.clean, psid_exp.clean.2)
+
+write_csv(benchmark.exp, "clean_data/intermediate_psid_clean_mar_race_exp.csv")
+print("Done with: Merging Experience to Main, Marital History, Race File")
 
 #------------------------------------------------------------------------------
 # FERTILITY USING FERTILITY HISTORY FILES
@@ -1922,43 +1825,16 @@ benchmark.fert.final <- benchmark.fert.synth %>%
     # This variable repeats the procedure above, but omits the step where we assign age at first birth
     # based on the respondent's age when the head's oldest child was born for the early covariate year
     afb.nosynth = ifelse(is.na(afb), afb.ferhist, afb),
-    # We then create categorical variables for parity and age at first birth based on these vars
-    num.kids.trunc = ifelse(num.children.synth == 0, "0", ifelse(
-      num.children.synth %in% c(1,2), "1to2", ifelse(
-        num.children.synth >= 3, "3plus",  NA))),
+    # We then create categorical variables for age at first birth based on these vars
     afb.cat = ifelse(afb.final == 9999, "nokids", ifelse(
-      num.kids.trunc == 0, "nokids", ifelse(
-        afb.final <= 21, "21minus", ifelse(
-          afb.final <= 27, "23to27", "28plus")))))
-
-rm(psid_fert, benchmark.fert, psid.misskids, benchmark.ids,
-   test, t, test2)
-
-# We then merge in this data object to our observed data
-benchmark.fert.final <- benchmark.fert.synth %>%
-  left_join(., test3, by = c("indiv.id", "year")) %>%
-  # We create our final measures of fertility below
-  mutate(
-    # If age at first birth missing in the data, assigns age when head's oldest child was born
-    # This variable takes on the value of our first "synthetic" measure of fertility (using age when
-    # head's oldest child was born for the early year) when available. If this "synthetic" measure is
-    # missing, this variable takes on the value of our second "synthetic" measure, based on the last year
-    # in which a respondent was observed as childless when transitioning to having one child based on their 
-    # fertility history. If both values are missing, this value is missing
-    afb.final = case_when(is.na(afb.synth) ~ afb.ferhist, complete.cases(afb.synth) ~ afb.synth), 
-    # This variable repeats the procedure above, but omits the step where we assign age at first birth
-    # based on the respondent's age when the head's oldest child was born for the early covariate year
-    afb.nosynth = ifelse(is.na(afb), afb.ferhist, afb),
-    # We then create categorical variables for parity and age at first birth based on these vars
-    num.kids.trunc = ifelse(num.children.synth == 0, "0", ifelse(
-      num.children.synth %in% c(1,2), "1to2", ifelse(
-        num.children.synth >= 3, "3plus",  NA))),
-    afb.cat = ifelse(afb.final == 9999, "nokids", ifelse(
-      num.kids.trunc == 0, "nokids", ifelse(
+      num.children.synth == 0, "nokids", ifelse(
         afb.final <= 21, "21minus", ifelse(
           afb.final <= 27, "23to27", "28plus")))))
 
 rm(benchmark.fert.synth, test3)
+
+write_csv(benchmark.fert.final, "clean_data/intermediate_psid_clean_mar_race_exp_fert.csv")
+print("Done with: Merging Fertility to Main, Marital History, Race, Experience File")
 
 #------------------------------------------------------------------------------
 # CLEANED PSID DATA
@@ -1986,17 +1862,16 @@ benchmark.final <- benchmark.fert.final %>%
                         ind.orig %in% c(30:34, 49) & year == 1980 ~ 1, 
                       TRUE ~ 0),
     occ.managers = ifelse(is.na(occ2010), NA, ifelse(
-      #occ2010 <= 430, 1, 0,
       occ2010 <= 3650, 1, 0))) %>%
-  dplyr::select(indiv.id, year, female, family.id68, person.number68, family.id, cds.indicator, samp.error.stratum, samp.error.cluster,
-                samp.inc.1981, samp.inc.2017, imm.sample.97, imm.sample.17, imm.sample, latino.sample, missing.interview,
-                perwt, perwt.long, age, lead.age, rel.head, marstat.hd, numkids.fu, race, region, lead.region, yrs.ed.fam,
-                ann.wrk.hrs, lead.ann.wrk.hrs,   wrk.pos, wrk.ft, wrk.pt, expt, expf, govt.job, union,
-                self.emp, ind.orig, ind1990, manuf, occ.orig, occ2010, occ.managers, wages, lead.wage, emp.tenure, military, agriculture, num.children,
-                num.children.hd, num.children.synth, dummy.nkids.synth, num.kids.trunc, age.first.birth, afb,
-                afb.synth, dummy.afb.synth, afb.ferhist, afb.final, afb.nosynth, afb.cat, marstat, marstat.hd,
-                mar.hhroster, cohab.hhroster, married, marstat.cohab, self.emp.lead, lead.ann.wrk.hrs, ann.wrk.hrs.pred,
-                age.youngest, faminc)
+  dplyr::select(indiv.id, year, female, family.id68, person.number68, 
+                family.id, imm.sample.97, imm.sample.17, latino.sample,
+                perwt, perwt.long, age, lead.age, rel.head, race, 
+                region, lead.region, yrs.ed.fam,
+                ann.wrk.hrs, ann.wrk.hrs.pred, lead.ann.wrk.hrs, 
+                expt, expf, govt.job, union, self.emp, manuf, occ.managers,
+                wages, lead.wage, emp.tenure, military, agriculture, 
+                num.children.synth, afb.cat, married, self.emp.lead, 
+                lead.ann.wrk.hrs, age.youngest, occ2010)
 
 rm(benchmark.fert.final)
 
@@ -2075,6 +1950,8 @@ benchmark.ipums <- crossing(occ2010 = ipums.data$occ2010,
                                1999, 2009, 2017), lead.wage, wages),
     ann.wrk.hrs = ifelse(year %in% c(1980, 1990, 
                                      1999, 2009, 2017), lead.ann.wrk.hrs, ann.wrk.hrs),
+    # Because military and agricultural employments are rare,
+    # we assume individuals with missing values 
     samp.exc.mil.ag = case_when(
       military == 1 | agriculture == 1 ~ 1,
       TRUE ~ 0),
@@ -2099,9 +1976,23 @@ benchmark.ipums <- crossing(occ2010 = ipums.data$occ2010,
       TRUE ~ 0),
     samp.inc.final = ifelse(samp.exc.mil.ag != 1 & samp.exc.selfemp != 1 & samp.exc.region != 1 &
                               samp.exc.zerowage != 1 & samp.inc.age == 1 & ann.wrk.hrs > 0,
-                            1, 0))
+                            1, 0)) %>%
+  # We set wages for both the main timing and the alternate timing
+  # to equal wages as measured in 1981, 2017
+  mutate(wages = ifelse(year %in% c(1980, 1990, 1999, 2009, 2017), 
+                        lead.wage, wages),
+       ann.wrk.hrs = ifelse(year %in% c(1980, 1990, 
+                                        1999, 2009, 2017), 
+                            lead.ann.wrk.hrs, ann.wrk.hrs)) %>%
+  # Removing "lead" variables used to generate the sample restriction +
+  # annual work hours and wages for the alternate variable timings, 
+  # extraneous id vars
+  dplyr::select(-c(starts_with("lead"), self.emp.lead, 
+                   military, agriculture, occ2010, ann.wrk.hrs.pred,
+                   family.id68, person.number68, family.id))
 
 #------------------------------------------------------------------------------
 # SAVE FILE TO THE CLEAN DATA FOLDER
 #------------------------------------------------------------------------------
-write_csv(benchmark.ipums, "clean_data/psid_clean.csv")
+write_csv(benchmark.ipums, paste0("clean_data/", "psid_clean_", Sys.Date(), ".csv"))
+print("Done with: All Preprocessing")
