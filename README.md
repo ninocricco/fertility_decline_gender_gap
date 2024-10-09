@@ -1,16 +1,15 @@
-# Replication Code for "Can Fertility Decline Help Explain the Narrowing Gender Wage Gap?"
+# Replication Code for "Can Fertility Decline Help Explain Gender Pay Convergence?"
 ##  Nino Cricco and Alexandra Killewald
 
-These files contain the replication code for the article "Can Fertility Decline Help Explain the Narrowing Gender Pay Gap?". This project uses publicly available data from the Panel Study of Income Dynamics (PSID), which are available to researchers at <https://psidonline.isr.umich.edu/>, and the U.S. Decennial Census and the American Community Survey, which are available to researchers at <https://usa.ipums.org/usa/>. This repository contains all the code files needed to create the output in this article. The data can be donwloaded directly by users (instructions provided below), or can be accessed via the PSID data repository at <https://linkherewhendone>, which contains both raw and clean data files. 
-
+These files contain the replication code for the article "Can Fertility Decline Help Explain Gender Pay Convergence?". This project uses publicly available data from the Panel Study of Income Dynamics (PSID), which are available to researchers at <https://psidonline.isr.umich.edu/>, and the U.S. Decennial Census and the American Community Survey, which are available to researchers at <https://usa.ipums.org/usa/>. This repository contains all the code files needed to create the output in this article. The data can be donwloaded directly by users (instructions provided below), or can be accessed via the PSID Public Extract data repository at <https://www.openicpsr.org/openicpsr/project/209567/version/V1/view)>, which contains both raw and clean data files. Please note that the user will have to create an account with ICPSR to access the files.
 
 The files in the PSID data repository are organized in the following folders:
 
 - `raw_data`: contains the raw data downloaded from the PSID, IPUMS, and crosswalks provided by the census bureau. 
 - `clean_data`: contains the transformed data after data processing and missing data imputation. All of the analysis files draw on the files in this folder.  
-- `jobs`: contains the code files used to process the data, conduct the analyses, and create the output for the article. The code files are organized according to files needed for setup, data processing, data analysis, and output creation. For more details, see the Code files section below. 
-- `tables`: contains raw as well as formatted table output
-- `figures`: contains all figures 
+- `jobs`: contains the code files used to process the data, conduct the analyses, and create the output for the article. The code files are organized according to files needed for setup, data processing, data analysis, and output creation. For more details, see the Code files section below.
+
+Some of the code files save the output to named folders- to ensure easy replication, make sure there are empty folders in your directory named "tables" and "figures", or change the paths in the code files to save the output in a different directory. 
 
 ## Data
 
