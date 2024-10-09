@@ -73,7 +73,7 @@ generate_means_year_table <- function(data,
     mutate("(Intercept)" = 1) %>%
     filter(.imp != 0) %>%
     dplyr::select(year, female, "(Intercept)", everything()) %>%
-    dplyr::select(-c(.imp, perwt_norm_wmean, perwt_norm_wsd)) %>%
+    dplyr::select(-c(.imp, starts_with("perwt"))) %>%
     ungroup() %>%
     group_by(year, female) %>%
     summarise_all(mean) %>%

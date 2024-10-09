@@ -1,27 +1,24 @@
-#**********************************************************
-# PROJECT: KILLEWALD- GENDER WAGE DISTRIBUTION
-# FILE: ANALYSES, APPENDIX TABLE 8: ALTERNATIVE FERTILITY MEASURES
+#------------------------------------------------------------------------------
+# PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
+# FILE: ANALYSES, APPENDIX: ALTERNATIVE MEASURES OF FERTILITY
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 08/01/23 (mdy)
-#**********************************************************
+#------------------------------------------------------------------------------
 
-# This conducts the same analyses as the main decompositions,
-# but with different fertility measures to assess the robustness
-# of our results to measures typically used in the literature
-# (continuous fertility measure, categorical measure distinguishing
-# 1, 2, and 3+ kids, and adding a categorical measure of fertility 
-# timing in addition to the measure of parity
+date_run_id <-  "2024-06-07"
 
 opts <- options(knitr.kable.NA = "")
 
-#*# Loading helper functions
-source("jobs/0-functions.R")
-source("jobs/0-libraries.R")
+# Loading helper functions and libraries
+source("jobs/1-load-libraries.R")
+source("jobs/1-functions.R")
 
 # Loading the imputed dataset
-psid_imp <- read_csv("clean_data/psid_final.csv")
+psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
 
-source("jobs/3-analysis-arguments.R")
+# Loading in objects that specify arguments passed to the 
+# analysis functions multiple times
+source("jobs/4-analysis-arguments.R")
+
 
 covariates = c("numkids.1", "numkids.2", "numkids.3plus", "age", "agesq",
                "Black", "Hispanic", "Other",
@@ -99,12 +96,12 @@ ta8_timingcont <- mapply(perform_decomposition_analysis, covariates_to_exclude, 
   mutate_if(is.numeric, ~.*100) %>%
   mutate_if(is.numeric, round, digits = 2)
 
-sample_conditions = list("age >= 40",
-                         "samp.exc.mil.ag != 1", 
-                         "samp.exc.selfemp != 1", 
-                         "samp.exc.region != 1",
-                         "samp.exc.zerowage != 1", 
-                         "ann.wrk.hrs > 0")
+sample_conditions_40plus = list("age >= 40",
+                                "samp.exc.mil.ag != 1", 
+                                "samp.exc.selfemp != 1", 
+                                "samp.exc.region != 1",
+                                "samp.exc.zerowage != 1", 
+                                "ann.wrk.hrs > 0")
 
 covariates = c("num.kids.cont", "age", "agesq",
                "Black", "Hispanic", "Other",
@@ -114,6 +111,12 @@ covariates = c("num.kids.cont", "age", "agesq",
                "ftormore", "overwork", 
                "union", "govt.job", "occ.pct.female", 
                "occ.managers", "manuf")
+
+conditions_expr <- glue::glue("({paste(sample_conditions_40plus, collapse = ') & (')})")
+
+psid_imp <- psid_imp %>%
+  mutate(samp.inc = ifelse(eval(parse(text = conditions_expr)), 1, 0)) %>%
+  filter(samp.inc == 1) 
 
 ta8_40plus <- mapply(perform_decomposition_analysis, covariates_to_exclude, model_labels, SIMPLIFY = FALSE) %>% 
   bind_rows() %>%
@@ -140,7 +143,7 @@ ta8 <- left_join(ta8_cat %>%  dplyr::select(Model, Variable, Total_CharGap) %>%
                  ta8_timing %>% dplyr::select(Model, Variable, Total_CharGap) %>%
                    rename(Timing = "Total_CharGap") %>% filter(
                      Variable %in% c("afb.cat_21minus", "afb.cat_23to27",
-                                "afb.cat_28plus", "Total")) %>%
+                                     "afb.cat_28plus", "Total")) %>%
                    mutate(group = ifelse(Variable == "Total", "Total", "Fertility")) %>%
                    group_by(group, Model) %>%
                    summarise_if(is.numeric, funs(sum(., na.rm = TRUE))), by = c("Model", "group")) %>%
@@ -161,12 +164,12 @@ ta8 <- left_join(ta8_cat %>%  dplyr::select(Model, Variable, Total_CharGap) %>%
             by = c("Model", "group")) %>%
   arrange(Model)
 
-write_csv(ta8, "tables/tablea8.csv")
+write_csv(ta8, "tables/table_altfertspecs.csv")
 
 kable(ta8 %>% dplyr::select(-Model), booktabs = T, format = "latex", 
-      caption = "Table A8: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Fertility, Alternative Fertility Specifications") %>%
-  pack_rows("Baseline", 1, 2, bold = T) %>% 
-  pack_rows("+ Background", 3, 4, bold = T) %>% 
-  pack_rows("+ Education", 5, 6, bold = T) %>% 
-  pack_rows("+ Work Experience and Job Tenure", 7, 8, bold = T) %>% 
-  pack_rows("Full", 9, 10, bold = T)
+      caption = "Table A5: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Fertility Decline, Alternative Fertility Specifications") %>%
+  pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
+  pack_rows("Model 2: + Background", 3, 4, bold = T) %>% 
+  pack_rows("Model 3: + Education", 5, 6, bold = T) %>% 
+  pack_rows("Model 4: + Work Experience and Job Tenure", 7, 8, bold = T) %>% 
+  pack_rows("Model 5: Full", 9, 10, bold = T)

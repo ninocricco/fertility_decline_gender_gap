@@ -1,129 +1,44 @@
-#**********************************************************
-# PROJECT: KILLEWALD- GENDER WAGE DISTRIBUTION
-# FILE: AUXILIARY ANALYSES, LABOR FORCE SELECTION ADJUSTMENTS
+#------------------------------------------------------------------------------
+# PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
+# FILE: ANALYSES, APPENDIX: ADJUSTING FOR CHANGING (OBSERVED) PATTERNS OF 
+# LABOR FORCE SELECTION
+# GENERATES BOOTSTRAPPED ESTIMATES FOR CONFIDENCE INTERVALS
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 08/02/2023 (mdy)
-#**********************************************************
+#------------------------------------------------------------------------------
+
+date_run_id <-  "2024-06-07"
 
 opts <- options(knitr.kable.NA = "")
 
-# Loading helper functions
-source("jobs/0-functions.R")
-source("jobs/0-libraries.R")
+#*# Loading helper functions
+source("jobs/1-functions.R")
+source("jobs/1-load-libraries.R")
 
 # Loading the imputed dataset
-psid_imp <- read_csv("clean_data/psid_final.csv")
+psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
+source("jobs/4-analysis-arguments.R")
 
-source("jobs/3-analysis-arguments.R")
-
-# First creating a subset of the full data restriting only by age and region
-
-benchmark <- psid_imp %>%
-  mutate(age.spline1 = ifelse(age < 45, age, 45), 
-         age.spline2 = ifelse(age >= 45, age-45, 0)) %>%
-  filter(samp.inc.age == 1, samp.exc.region != 1, year %in% years)
-
-# Split the data by imputation for women in 1981, 2019
-rw.samp.wt0  <- imputationList(benchmark %>%
-                                 filter(year == 1981, female == 1) %>%
-                                 group_split(.imp))
-
-rw.samp.wt1  <- imputationList(benchmark %>%
-                                 filter(year == 2019, female == 1) %>%
-                                 group_split(.imp))
-
-# Creates a survey design object for this split data
-rw.design.wt0 <-svydesign(ids = ~0, data = rw.samp.wt0, weights = ~perwt, nest = T)
-rw.design.wt1 <-svydesign(ids = ~0, data = rw.samp.wt1, weights = ~perwt, nest = T)
-
-# Estimates the labor force selection model separately for each imputation and year for women
-lfselec.wt0 <- with(rw.design.wt0, svyglm(
-  samp.inc.final ~ age.spline1 + age.spline2 + Northeast + Northcentral + South + 
-    Black + Hispanic + Other + HighSchool + SomeCollege + ba.avdeg + married +
-    num.kids.cont + age.youngest.cat_zerotofive +
-    age.youngest.cat_sixtoseventeen, family = binomial(link="logit")))
-
-lfselec.wt1 <- with(rw.design.wt1, svyglm(
-  samp.inc.final ~ age.spline1 + age.spline2 + Northeast + Northcentral + South + 
-    Black + Hispanic + Other + HighSchool + SomeCollege + ba.avdeg + married +
-    num.kids.cont + age.youngest.cat_zerotofive +
-    age.youngest.cat_sixtoseventeen, family = binomial(link="logit")))
-
-# Combining results across imputations 
-lfselec.wt0.comb <- MIcombine((lfselec.wt0))
-lfselec.wt1.comb <- MIcombine((lfselec.wt1))
-
-# Using results combined from imputations to generate a dataframe with 
-# model coefficients and standard errors
-lfselec.w.df <- bind_rows(coef(lfselec.wt0.comb), vcov::se(lfselec.wt0.comb)) %>%
-  mutate(year = 1981, female = 1, estimate = c("coef", "se")) %>%
-  bind_rows(bind_rows(coef(lfselec.wt1.comb), vcov::se(lfselec.wt1.comb)) %>%
-              mutate(year = 2019, female = 1, estimate = c("coef", "se")))
-
-# Following the same procedure as above, for men
-rw.samp.mt0  <- imputationList(benchmark %>%
-                                 filter(year == 1981, female == 0) %>%
-                                 group_split(.imp))
-
-rw.samp.mt1  <- imputationList(benchmark %>%
-                                 filter(year == 2019, female == 0) %>%
-                                 group_split(.imp))
-
-rw.design.mt0 <-svydesign(ids = ~0, data = rw.samp.mt0, weights = ~perwt, nest = T)
-
-rw.design.mt1 <-svydesign(ids = ~0, data = rw.samp.mt1, weights = ~perwt, nest = T)
-
-lfselec.mt0 <- with(rw.design.mt0, svyglm(
-  samp.inc.final ~ age.spline1 + age.spline2 + Northeast + Northcentral + South + 
-    Black + Hispanic + Other + HighSchool + SomeCollege + ba.avdeg + married +
-    num.kids.cont + age.youngest.cat_zerotofive +
-    age.youngest.cat_sixtoseventeen, family = binomial(link="logit")))
-
-lfselec.mt1 <- with(rw.design.mt1, svyglm(
-  samp.inc.final ~ age.spline1 + age.spline2 + Northeast + Northcentral + South + 
-    Black + Hispanic + Other + HighSchool + SomeCollege + ba.avdeg + married +
-    num.kids.cont + age.youngest.cat_zerotofive +
-    age.youngest.cat_sixtoseventeen, family = binomial(link="logit")))
-
-lfselec.mt0.comb <- MIcombine((lfselec.mt0))
-lfselec.mt1.comb <- MIcombine((lfselec.mt1))
-
-lfselec.m.df <- bind_rows(coef(lfselec.mt0.comb), vcov::se(lfselec.mt0.comb)) %>%
-  mutate(year = 1981, female = 0, estimate = c("coef", "se")) %>%
-  bind_rows(bind_rows(coef(lfselec.mt1.comb), vcov::se(lfselec.mt1.comb)) %>%
-              mutate(year = 2019, female = 0, estimate = c("coef", "se")))
-
-# Creating a dataframe of the rewieghting model coefficients
-rw.modelcoefs <- bind_rows(lfselec.m.df, lfselec.w.df) %>% 
-  gather(key, value, -c(female, year, estimate)) %>% 
-  mutate(key = as_factor(key)) %>%
-  pivot_wider(id_cols = c(key),
-              names_from = c(estimate, female, year), values_from = c(value)) %>%
-  mutate_if(is.numeric, round, digits = 3) %>%
-  gather(names, values, -key) %>%
-  separate(names, into = c("estimate", "group", "year")) %>%
-  mutate(group = ifelse(group == 0, "Men", "Women")) %>%
-  pivot_wider(names_from = c(group, year), values_from = values) %>%
-  arrange(key)
-
-write_csv(rw.modelcoefs, "tables/tablea11.csv")
-
-knitr::kable(rw.modelcoefs, booktabs = T, format = "latex", 
-             caption = "Table A10: Coefficients from the Reweighting Model") %>%
-  footnote("Coefficients from gender-specific logistic regressions predicting sample inclusion. Standard errors in parentheses", 
-           threeparttable = T) %>%
-  add_header_above(c(" " = 2, "Male" = 2, "Female" = 2)) %>%
-  pack_rows("Age, Linear Spline", 3, 6, bold = F)  %>%
-  pack_rows("Region", 7, 12, bold = F) %>% pack_rows("Race", 13, 18, bold = F) %>%
-  pack_rows("Years of Education", 19, 24, bold = F) %>%
-  pack_rows("Age, Youngest Child in Household", 29, 32, bold = F)
-
-# Measuring the probability of sample inclusion
-
-prob.inc <- benchmark %>% 
-  filter(year %in% years) %>%
-  group_by(female, year) %>% 
-  summarise(Prob.Inclusion = wtd.mean(samp.inc.final, weights = perwt))
+for(i in 1:10000){
+  # First creating a subset of the full data restriting only by age and region
+  
+  benchmark <- psid_imp %>%
+    mutate(age.spline1 = ifelse(age < 45, age, 45), 
+           age.spline2 = ifelse(age >= 45, age-45, 0)) %>%
+    filter(samp.inc.age == 1, samp.exc.region != 1, year %in% years) %>%
+    group_by(year, female, .imp) %>%
+    nest() %>%              
+    ungroup() %>% 
+    arrange(year, female) %>%
+    mutate(n = c(rep(2216, 20), rep(2517, 20), rep(3569, 20), rep(4258, 20))) %>%
+    mutate(samp = map2(data, n, replace = T, sample_n)) %>%
+    dplyr::select(-data) %>%
+    unnest(samp) %>%
+    dplyr::select(-n)
+  
+  prob.inc <- benchmark %>% 
+    filter(year %in% years) %>%
+    group_by(female, year) %>% 
+    summarise(Prob.Inclusion = wtd.mean(samp.inc.final, weights = perwt_norm))
 
 # Logit model for probability in the labor market in the early period:
 # Age, race, region, marital status, education, fertility
@@ -136,7 +51,7 @@ benchmark.mod <- benchmark %>%
                Black + Hispanic + Other + HighSchool + SomeCollege + ba.avdeg + married +
                num.kids.cont + age.youngest.cat_zerotofive +
                age.youngest.cat_sixtoseventeen, family = binomial(link="logit"),
-             data = ., weights = perwt))) %>%
+             data = ., weights = perwt_norm))) %>%
   dplyr::select(-data) %>% 
   arrange(year, female)
 
@@ -169,8 +84,8 @@ psid.rw <- benchmark %>%
   # First set of weights multiplies sampling weights in 2017 by predicted probability
   # in the labor force in earlier period for all sample members. Second set of weights
   # does the same, but only for women, keeping men's sampling weights in 2017 the same
-  mutate(lf.pred.w = ifelse(year == 1981, perwt, 
-                            perwt * (lf.pred_1981/lf.pred_2019))) %>%
+  mutate(lf.pred.w = ifelse(year == 1981, perwt_norm, 
+                            perwt_norm * (lf.pred_1981/lf.pred_2019))) %>%
   filter(samp.inc.final == 1) %>%
   filter(year %in% years)
 
@@ -179,8 +94,8 @@ means.year_sampweights <- psid.rw %>%
   group_by(year, female, .imp) %>% # For each year, sex, and imputation,
   # Compute the weighted means for the variables below, using the weights specified in the function
   dplyr::select(all_of(outcome), all_of(covariates), expf, White, West, LessthanHS, 
-                perwt, lf.pred.w) %>%
-  summarize_all(list(wmean = ~weighted.mean(., w = perwt))) %>% 
+                weights, lf.pred.w) %>%
+  summarize_all(list(wmean = ~weighted.mean(., w = perwt_norm))) %>% 
   mutate("(Intercept)" = 1) %>% # Creating an intercept column
   dplyr::select(year, female, "(Intercept)", everything()) %>% # Ordering the columns
   dplyr::select(-c(.imp, lf.pred.w_wmean)) %>% # Removing weight and imputation column
@@ -194,7 +109,7 @@ means.year_rw <- psid.rw %>%
   group_by(year, female, .imp) %>% # For each year, sex, and imputation,
   # Compute the weighted means for the variables below, using the weights specified in the function
   dplyr::select(all_of(outcome), all_of(covariates), expf, White, West, LessthanHS, 
-                perwt, lf.pred.w) %>%
+                perwt_norm, lf.pred.w) %>%
   summarize_all(list(wmean = ~weighted.mean(., w = lf.pred.w))) %>% 
   mutate("(Intercept)" = 1) %>% # Creating an intercept column
   dplyr::select(year, female, "(Intercept)", everything()) %>% # Ordering the columns
@@ -208,38 +123,11 @@ means.year_rw <- psid.rw %>%
 names(means.year_sampweights) <- gsub("_wmean", "", names(means.year_sampweights))
 names(means.year_rw) <- gsub("_wmean", "", names(means.year_rw))
 
-means.table <- 
-  bind_rows(means.year_sampweights, means.year_rw #%>% filter(year == "2019_RW")
-  ) %>%
-  mutate_at(vars(all_of(region), all_of(race), "married", all_of(ed), all_of(wrkhrs),
-                 "union", "govt.job", "occ.managers", "manuf", "LessthanHS", 
-                 "West", "White"), function (x) x*100) %>% 
-  mutate_if(is.numeric, round, digits = 1) %>%
-  gather(vars, means, -c(year, female)) %>%
-  mutate(female = ifelse(female == 1, "Women", "Men")) %>%
-  pivot_wider(id_cols = c(vars),
-              names_from = c(female, year), values_from = means)
-
-write_csv(means.table, "tables/tablea12.csv")
-
-# Generating the table
-knitr::kable(means.table %>% dplyr::select(vars, Men_2019, Men_2019_RW, Women_2019, Women_2019_RW) %>%
-               filter(vars %!in% c("lnhrlywage", "(Intercept)", "agesq", "log.expf", "perwt")) %>%
-               dplyr::select(vars, Men_2019, Men_2019_RW, Women_2019, Women_2019_RW), 
-             booktabs = T, format = "latex", 
-             caption = "Table A11: 2018 Sample Descriptive Statistics Adjusting for Labor Force Selection") %>%
-  add_header_above(c(" ", "Men" = 2, "Women" = 2)) %>%
-  footnote("Descriptive statistics show weighted averages for the analytic sample by year and gender, using sample means and adjusting for changing patterns of labor force selection. The proportion of all PSID heads and wives aged 30-55 that meets our sample inclusion criteria are 76.3 and 62.8 for men and women in 1980, respectively, and 77.9 and 71.3 for men and women in 2018. The sample consists of PSID heads and wives reporting non-zero wages, excludes individuals who report being self-employed, and individuals employed in agriculture or the military", 
-           threeparttable = T) %>%
-  pack_rows("+ Background", 1, 2, bold = F) %>%
-  pack_rows("Race", 3, 5, bold = F) %>% pack_rows("Region", 6, 8, bold = F) %>%
-  pack_rows("Years of Education", 9, 11, bold = F)
-
 # Generating the decomposition
 # First get the weighted coefficients with sample weights and with 
 # labor force adjusted weights
 coefs.sw <- mapply(generate_regression_table_func, 
-                   covariates_to_exclude, model_labels, weights = "perwt", 
+                   covariates_to_exclude, model_labels, weights = weights, 
                    SIMPLIFY = FALSE) %>% 
   bind_rows()
 
@@ -346,18 +234,86 @@ decomp_rwtosw <- mapply(perform_decomposition_analysis_rwtosw,
   mutate_if(is.numeric, round, digits = 2)
 
 # Creating table A13
-ta13 <- left_join(decomp_rwtosw %>% filter(Variable %in% c("num.kids.cont", "Total")) %>%
+tlfadj <- left_join(decomp_rwtosw %>% #filter(Variable %in% c("num.kids.cont", "Total")) %>%
                     dplyr::select(Variable, Model, "1980 to 2018, Reweighted" = "Total_CharGap"), 
-                  decomp_swtorw %>% filter(Variable %in% c("num.kids.cont", "Total")) %>%
+                  decomp_swtorw %>% #filter(Variable %in% c("num.kids.cont", "Total")) %>%
                     dplyr::select(Variable, Model, "2018 Reweighted to 2018" = "Total_CharGap"), 
                   by = c("Variable", "Model"))
 
-write_csv(ta13, "tables/tablea13.csv")
+saveRDS(tlfadj, file = paste("bootstrap_lfadj/tlfadj_", i, ".RDS", sep = ""))
 
-kable(ta13 %>% dplyr::select(-Model), booktabs = T, format = "latex", 
-      caption = "Table A12: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Characteristics, Decomposing Population Change and Changing Labor Force Selection") %>%
-  pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
-  pack_rows("Model 2: + Background", 3, 4, bold = T) %>% 
-  pack_rows("Model 3: + Education", 5, 6, bold = T) %>% 
-  pack_rows("Model 4: + Work Experience and Job Tenure", 7, 8, bold = T) %>% 
-  pack_rows("Model 5: Full", 9, 10, bold = T)
+toc()
+
+}
+
+# List all .RDS files
+files <- list.files(path = "bootstrap_lfadj", pattern="*.RDS")
+
+# Function to load .RDS files
+load_rds <- function(x){
+  readRDS(paste("bootstrap_lfadj", x, sep = "/"))
+}
+
+# Load all .RDS files into a list of data frames
+df_list <- lapply(files, load_rds)
+
+# Combine all data frames into one data frame
+df_combined <- do.call(rbind, df_list) %>%
+  gather(quantity, value, -c(Variable, Model)) %>%
+  pivot_wider(values_from = value, names_from = c(Variable, quantity, Model)) %>%
+  unnest()
+
+# Calculate 5th and 95th percentiles for each column
+df_percentiles <- sapply(df_combined,
+                         function(x) quantile(x, probs=c(0.05, 0.95)))
+
+# Print out the percentile data frame
+bootstrap <- as.data.frame(df_percentiles %>% t()) %>%
+  mutate(var = rownames(.)) %>%
+  separate(var, into = c("Group", "Measure", "Model"), sep = "_")
+
+rownames(bootstrap) <- NULL
+
+bootstrap_table <- bootstrap %>% 
+  select(Measure, Group, Model, everything()) %>% 
+  mutate(Model = factor(Model, 
+                        levels = c("Model 1: Baseline", 
+                                   "Model 2: + Background", 
+                                   "Model 3: + Education", 
+                                   "Model 4: + Work Experience and Job Tenure",
+                                   "Model 5: Full"))) %>%
+  rename(fifth = "5%", ninetyfifth = "95%") 
+
+write_csv(bootstrap_table, "tables/bootstrap_table_lfadj.csv")
+
+# Checking that mdipoint between 5th and 95th percentiles approximates the point estimates
+t3 <- read_csv("tables/table_lfadj_pointestimates.csv") %>%
+  gather(Group, pointestimate, -c(Variable, Model)) %>%
+  left_join(., read_csv("tables/bootstrap_table_lfadj.csv")  %>%
+              rename(Variable = Group, Group = Measure),
+            by = c("Variable", "Group", "Model")) %>%
+  mutate(midpoint = (fifth + ninetyfifth) / 2)
+
+
+t_lfadj_bs <- read_csv("tables/table_lfadj_pointestimates.csv") %>% 
+  mutate_if(is.numeric, ~ sprintf("%.2f", .x)) %>%
+  bind_rows(read_csv("tables/bootstrap_table_lfadj.csv") %>%
+              mutate_if(is.numeric, ~ sprintf("%.2f", .x)) %>%
+              mutate(confint = paste0("(", fifth, ", ", ninetyfifth, ")")) %>% 
+              transmute(Variable = Group, Group = Measure, Model, confint) %>% 
+              pivot_wider(names_from = c(Group), values_from = confint)) %>%
+  arrange(Model, Variable)
+
+kable(t_lfadj_bs %>% filter(Variable %in% c("num.kids.cont", "Total")) %>%
+        select(-Model), format = "latex", booktabs = T,
+      caption = "Table A7: Percent of Gender Pay Convergence 1980-2018 Explained by Changing Characteristics, Decomposing Population Change and Changing Labor Force Selection") %>%
+  add_header_above(c(" ", "Men" = 2, "Women" = 2)) %>%
+  footnote("Note: See text for details of model specifications. 95 % bootstrapped confidence intervals are shown in parentheses.",
+           threeparttable = TRUE) %>%
+  pack_rows("Model 1: Baseline", 1, 4, bold = TRUE) %>%
+  pack_rows("Model 2: + Background", 5, 8, bold = TRUE) %>%
+  pack_rows("Model 3: + Education", 9, 12, bold = TRUE) %>%
+  pack_rows("Model 4: + Work Experience and Job Tenure", 13, 16, bold = TRUE) %>%
+  pack_rows("Model 5: Full", 17, 20, bold = TRUE)
+
+

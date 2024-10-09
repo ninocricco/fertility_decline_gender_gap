@@ -5,9 +5,8 @@
 #------------------------------------------------------------------------------
 
 # Loading libraries and helper functions
-source("jobs/0-functions.R")
-source("jobs/0-libraries.R")
-
+source("jobs/1-load-libraries.R")
+source("jobs/1-functions.R")
 
 #------------------------------------------------------------------------------
 # LOADING AND CLEANING DATA
@@ -685,6 +684,8 @@ psid_raw <- data %>%
   mutate(
     # Creating indicator variable labeling whether respondent is head or wife in that year
     hd.wife = ifelse(rel.head %in% c("head", "wife"), 1, 0))
+
+write_csv(psid_raw, "clean_data/intermediate_psid_raw.csv")
 
 # Creating a version of the data where we limit observations to individuals who are observed 
 # as heads or wives in our outcome years
@@ -1870,7 +1871,7 @@ benchmark.final <- benchmark.fert.final %>%
                 ann.wrk.hrs, ann.wrk.hrs.pred, lead.ann.wrk.hrs, 
                 expt, expf, govt.job, union, self.emp, manuf, occ.managers,
                 wages, lead.wage, emp.tenure, military, agriculture, 
-                num.children.synth, afb.cat, married, self.emp.lead, 
+                num.children, afb.cat, married, self.emp.lead, 
                 lead.ann.wrk.hrs, age.youngest, occ2010)
 
 rm(benchmark.fert.final)
@@ -1902,7 +1903,7 @@ ipums.occs <- ipums.occs.raw %>%
   filter(EMPSTAT ==1) %>% # INCLUDING ONLY THOSE WHO ARE EMPLOYED
   filter(AGE >= 30 & AGE <= 55) # Defining occupational characteristics only for those in our analytical sample's age range
 
-rm(ipums.occs.raw)
+rm(ipums.occs.raw) 
 
 ipums.data <- ipums.occs %>%
   group_by(YEAR, OCC2010) %>%
@@ -1916,6 +1917,8 @@ ipums.data <- ipums.occs %>%
   mutate(year = ifelse(year == 2019, 2017, ifelse(
     year == 2000, 1999, ifelse(year == 2012, 2009, year))),
     occ2010 = as.numeric(occ2010))
+
+rm(ipums.occs) 
 
 # Creating the object to merge to our observed data
 # Note: this object will create a row for each year in our observed data 
@@ -1981,9 +1984,9 @@ benchmark.ipums <- crossing(occ2010 = ipums.data$occ2010,
   # to equal wages as measured in 1981, 2017
   mutate(wages = ifelse(year %in% c(1980, 1990, 1999, 2009, 2017), 
                         lead.wage, wages),
-       ann.wrk.hrs = ifelse(year %in% c(1980, 1990, 
-                                        1999, 2009, 2017), 
-                            lead.ann.wrk.hrs, ann.wrk.hrs)) %>%
+         ann.wrk.hrs = ifelse(year %in% c(1980, 1990, 
+                                          1999, 2009, 2017), 
+                              lead.ann.wrk.hrs, ann.wrk.hrs)) %>%
   # Removing "lead" variables used to generate the sample restriction +
   # annual work hours and wages for the alternate variable timings, 
   # extraneous id vars

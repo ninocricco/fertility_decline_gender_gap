@@ -4,11 +4,12 @@
 # AUTHOR: NINO CRICCO
 #------------------------------------------------------------------------------
 
-# Loading libraries
+# Loading libraries and restoring environment
 # Loading helper functions
-source("jobs/0-functions.R")
-source("jobs/0-libraries.R")
-psid <- read_csv(paste0("clean_data/psid_clean_", Sys.Date(), ".csv"))
+source("jobs/1-load-libraries.R")
+source("jobs/1-functions.R")
+
+psid <- read_csv(paste0("clean_data/psid_clean_", "2024-06-06", ".csv"))
 
 #------------------------------------------------------------------------------
 # IMPUTATION
@@ -64,7 +65,7 @@ process_period <- function(data, years, factor_vars, m) {
 }
 
 # Create list of periods to iterate through
-# This facilitates parallelization- can rull with slurm arrays on FASRC cluster
+# This facilitates parallelization- can run with slurm arrays on FASRC cluster
 periods <- list(
   c(1980, 1981),
   c(1990, 1991),
@@ -129,11 +130,11 @@ psid_imp <- df_imp.cart %>%
     ed.factor = ifelse(yrs.ed.fam < 12, "LessthanHS", ifelse(
       yrs.ed.fam == 12, "HighSchool", ifelse(
         yrs.ed.fam > 12 & yrs.ed.fam < 16, "SomeCollege", "ba.avdeg"))),
-    num.kids.trunc = ifelse(num.children.synth == 0, "0", ifelse(
-      num.children.synth == 1, "1", ifelse(
-        num.children.synth == 2, "2", ifelse(
-          num.children.synth >=3, "3plus", NA)))),
-    num.kids.cont = ifelse(num.children.synth > 6, 6, num.children.synth),
+    num.kids.trunc = ifelse(num.children == 0, "0", ifelse(
+      num.children == 1, "1", ifelse(
+        num.children == 2, "2", ifelse(
+          num.children >=3, "3plus", NA)))),
+    num.kids.cont = ifelse(num.children > 6, 6, num.children),
     # Creating factor variable for age of youngest child 
     age.youngest.cat = ifelse(age.youngest == 0, "nokids", ifelse(
       age.youngest <= 5 , "zerotofive", "sixtoseventeen"))) %>%
@@ -176,7 +177,7 @@ write_csv(psid_imputed_final, paste0("clean_data/psid_final_", Sys.Date(), ".csv
 
 missing_rates <- psid_imp %>% 
   filter(.imp == 0, samp.inc.final == 1, year %in% c(1981, 2019)) %>%
-  dplyr::select(year, age, region, race, num.kids.cont, married, ed.factor,
+  dplyr::select(year, age, region, race, num.children, married, ed.factor,
                 expf, govt.job, union, manuf, occ.managers, occ.pct.female, ann.wrk.hrs, 
                 emp.tenure) %>%
   group_by(year) %>%

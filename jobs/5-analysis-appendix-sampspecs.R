@@ -1,34 +1,31 @@
-#**********************************************************
-# PROJECT: KILLEWALD- GENDER WAGE DISTRIBUTION
-# FILE: ANALYSES, APPENDIX TABLE 7: ALTERNATIVE SAMPLE SPECS
+#------------------------------------------------------------------------------
+# PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
+# FILE: ANALYSES, APPENDIX: ALTERNATIVE SAMPLE SPECIFICATIONS
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 08/01/23 (mdy)
-#**********************************************************
+#------------------------------------------------------------------------------
 
-# This conducts the same analyses as the main decompositions,
-# but with different sample restrictions to check the robustness
-# of our results to different sample specifications (such as 
-# working full0-time, excluding the immigrant sample, and with
-# more limited age criteria)
+date_run_id <-  "2024-06-07"
 
 opts <- options(knitr.kable.NA = "")
 
-#*# Loading helper functions
-source("jobs/0-functions.R")
-source("jobs/0-libraries.R")
+# Loading helper functions and libraries
+source("jobs/1-load-libraries.R")
+source("jobs/1-functions.R")
 
 # Loading the imputed dataset
-psid_imp <- read_csv("clean_data/psid_final.csv")
+psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
 
-source("jobs/3-analysis-arguments.R")
+# Loading in objects that specify arguments passed to the 
+# analysis functions multiple times
+source("jobs/4-analysis-arguments.R")
 
 sample_conditions = list("samp.inc.age == 1",
-                            "samp.exc.mil.ag != 1", 
-                            "samp.exc.selfemp != 1", 
-                            "samp.exc.region != 1",
+                         "samp.exc.mil.ag != 1", 
+                         "samp.exc.selfemp != 1", 
+                         "samp.exc.region != 1",
                          "samp.exc.zerowage != 1", 
                          "ann.wrk.hrs > 0",
-                            "samp.inc.ft == 1")
+                         "samp.inc.ft == 1")
 
 covariates_to_exclude <- list(
   c(age, race, region, ed, marstat, laborsupply, jobchar),
@@ -54,17 +51,25 @@ ta7_ft <- mapply(perform_decomposition_analysis, covariates_to_exclude, model_la
   mutate_if(is.numeric, ~.*100) %>%
   mutate_if(is.numeric, round, digits = 2)
 
-write_csv(ta7_ft,  "tables/tablea7_ft.csv")
+# Loading helper functions and libraries
+source("jobs/1-load-libraries.R")
+source("jobs/1-functions.R")
 
-# Note: before proceeding to next, delete Working directory
+# Loading the imputed dataset
+psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
+
+# Loading in objects that specify arguments passed to the 
+# analysis functions multiple times
+source("jobs/4-analysis-arguments.R")
 
 sample_conditions = list("samp.inc.age == 1",
-                               "samp.exc.mil.ag != 1", 
-                               "samp.exc.selfemp != 1", 
-                               "samp.exc.region != 1",
-                               "samp.exc.zerowage != 1", 
+                         "samp.exc.mil.ag != 1", 
+                         "samp.exc.selfemp != 1", 
+                         "samp.exc.region != 1",
+                         "samp.exc.zerowage != 1", 
                          "ann.wrk.hrs > 0",
-                         "imm.sample == 0")
+                         "imm.sample.97 == 0",
+                         "imm.sample.17 == 0")
 
 covariates_to_exclude <- list(
   c(age, race, region, ed, marstat, laborsupply, jobchar),
@@ -90,9 +95,16 @@ ta7_noimm <- mapply(perform_decomposition_analysis, covariates_to_exclude, model
   mutate_if(is.numeric, ~.*100) %>%
   mutate_if(is.numeric, round, digits = 2)
 
-write_csv(ta7_noimm,  "tables/tablea7_noimm.csv")
+# Loading helper functions and libraries
+source("jobs/1-load-libraries.R")
+source("jobs/1-functions.R")
 
-# Note: before proceeding to next, delete Working directory
+# Loading the imputed dataset
+psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
+
+# Loading in objects that specify arguments passed to the 
+# analysis functions multiple times
+source("jobs/4-analysis-arguments.R")
 
 sample_conditions = list("samp.inc.age == 1",
                          "samp.exc.mil.ag != 1", 
@@ -119,24 +131,19 @@ ta7_35to55 <- mapply(perform_decomposition_analysis, covariates_to_exclude, mode
   mutate_if(is.numeric, ~.*100) %>%
   mutate_if(is.numeric, round, digits = 2)
 
-write_csv(ta7_35to55,  "tables/tablea7_35to55.csv")
-
-ta7_ft <- read_csv("tables/tablea7_ft.csv")
-ta7_noimm <- read_csv("tables/tablea7_noimm.csv")
-
-ta7 <- left_join(ta7_ft %>% dplyr::select(Model, Variable, Total_CharGap) %>%
-                 rename(Fulltime = "Total_CharGap"), 
+ta_sampspecs <- left_join(ta7_ft %>% dplyr::select(Model, Variable, Total_CharGap) %>%
+                   rename(Fulltime = "Total_CharGap"), 
                  ta7_noimm %>% dplyr::select(Model, Variable, Total_CharGap) %>%
-                 rename(NoImm = "Total_CharGap"), by = c("Model", "Variable")) %>%
+                   rename(NoImm = "Total_CharGap"), by = c("Model", "Variable")) %>%
   left_join(., ta7_35to55 %>% dplyr::select(Model, Variable, Total_CharGap) %>%
               rename(Age35to55 = "Total_CharGap"), by = c("Model", "Variable")) %>%
   filter(Variable %in% c("num.kids.cont", "Total")) %>%
   dplyr::select(Model, Variable, Fulltime, NoImm, Age35to55)
 
-write_csv(ta7, "tables/tablea7.csv")
+write_csv(ta_sampspecs, "tables/table_sampspecs.csv")
 
-kable(ta7 %>% dplyr::select(-Model), booktabs = T, format = "latex", 
-      caption = "Table A7: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Fertility, Alternative Sample Specifications") %>%
+kable(ta_sampspecs %>% dplyr::select(-Model), booktabs = T, format = "latex", 
+      caption = "Table A3: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Fertility, Alternative Sample Specifications") %>%
   pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
   pack_rows("Model 2: + Background", 3, 4, bold = T) %>% 
   pack_rows("Model 3: + Education", 5, 6, bold = T) %>% 

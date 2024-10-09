@@ -1,9 +1,8 @@
-#********************************************************
+#------------------------------------------------------------------------------
 # PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
 # FILE: CREATES VECTORS USED AS ARGUMENTS FOR ALL MAIN ANALYSES
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 08/01/2023 (mdy)
-#********************************************************
+#------------------------------------------------------------------------------
 
 # Setting vector arguments for main analyses
 data = psid_imp

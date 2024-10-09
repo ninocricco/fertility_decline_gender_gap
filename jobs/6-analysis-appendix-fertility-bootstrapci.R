@@ -1,19 +1,21 @@
-#**********************************************************
-# PROJECT: KILLEWALD- GENDER WAGE DISTRIBUTION
-# FILE: BOOTSTRAPPED SE'S, TABLE A8: ALTERNATIVE FERTILITY MEASURES
+#------------------------------------------------------------------------------
+# PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
+# FILE: ANALYSES, APPENDIX: ALTERNATIVE FERTILITY MEASURES
+# GENERATES BOOTSTRAPPED ESTIMATES FOR CONFIDENCE INTERVALS
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 08/02/2023 (mdy)
-#**********************************************************
+#------------------------------------------------------------------------------
+
+date_run_id <-  "2024-05-30"
 
 opts <- options(knitr.kable.NA = "")
 
 #*# Loading helper functions
-source("jobs/0-functions.R")
-source("jobs/0-libraries.R")
+source("jobs/1-functions.R")
+source("jobs/1-load-libraries.R")
 
 # Loading the imputed dataset
-psid_imp <- read_csv("clean_data/psid_final.csv")
-source("jobs/3-analysis-arguments.R")
+psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
+source("jobs/4-analysis-arguments.R")
 
 covariates_cat = c("numkids.1", "numkids.2", "numkids.3plus", "age", "agesq",
                    "Black", "Hispanic", "Other",
@@ -61,7 +63,7 @@ covariates = c("num.kids.cont", "age", "agesq",
                "union", "govt.job", "occ.pct.female", 
                "occ.managers", "manuf")
 
-for(i in 3019:10000){
+for(i in 1:10000){
   
   set.seed(i)
   
@@ -365,18 +367,18 @@ for(i in 3019:10000){
   
   # Stores results
   
-  saveRDS(fert_decomp, file = paste("bootstrap_tablea8/tablea8_bs_23.12.20_", i, ".RDS", sep = ""))
+  saveRDS(fert_decomp, file = paste("bootstrap_fertility/tablea8_bs_23.12.20_", i, ".RDS", sep = ""))
   
   toc()
   
 }
 
 # List all .RDS files
-files <- list.files(path = "bootstrap_tablea8", pattern="*.RDS")
+files <- list.files(path = "bootstrap_fertility", pattern="*.RDS")
 
 # Function to load .RDS files
 load_rds <- function(x){
-  readRDS(paste("bootstrap_tablea8", x, sep = "/"))
+  readRDS(paste("bootstrap_fertility", x, sep = "/"))
 }
 
 # Load all .RDS files into a list of data frames
@@ -411,14 +413,13 @@ bootstrap_table <- bootstrap %>%
   mutate(fifth = round(fifth * 100, digits = 2),
          ninetyfifth = round(ninetyfifth * 100, digits = 2))
 
-write_csv(bootstrap_table, "tables/bootstrap_tablea8.csv")
-
+write_csv(bootstrap_table, "tables/bootstrap_table_fertility.csv")
 
 # Checking that mdipoint between 5th and 95th percentiles approximates the point estimates
 ta8 <- read_csv("tables/tablea8.csv") %>%
   gather(Measure, pointestimate, -c(Model, group)) %>%
   mutate(Model = gsub("Model [0-9]+: ", "", Model)) %>%
   rename(Group = group) %>%
-  left_join(., bootstrap_table,
+  left_join(., bootstrap_table %>% mutate(Measure = ifelse(Measure == "Categorical + Timing", "TimingCont", Measure)),
             by = c("Measure", "Group", "Model")) %>%
   mutate(midpoint = (fifth + ninetyfifth) / 2)

@@ -1,23 +1,23 @@
-#**********************************************************
-# PROJECT: KILLEWALD- GENDER WAGE DISTRIBUTION
-# FILE: ANALYSES, APPENDIX TABLE 9: Alternative reference year
+#------------------------------------------------------------------------------
+# PROJECT: CAN DECLINING FERTILITY HELP EXPLAIN THE NARROWING GENDER PAY GAP?
+# FILE: ANALYSES, APPENDIX: ALTERNATIVE REFERENCE YEAR
 # AUTHOR: NINO CRICCO
-# LAST UPDATED: 08/01/23 (mdy)
-#**********************************************************
+#------------------------------------------------------------------------------
 
-# This conducts the same analyses as the main decompositions,
-# but using 2019 instead of 1980 as the reference year
+date_run_id <-  "2024-06-07"
 
 opts <- options(knitr.kable.NA = "")
 
-#*# Loading helper functions
-source("jobs/0-functions.R")
-source("jobs/0-libraries.R")
+# Loading helper functions and libraries
+source("jobs/1-load-libraries.R")
+source("jobs/1-functions.R")
 
 # Loading the imputed dataset
-psid_imp <- read_csv("clean_data/psid_final.csv")
+psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
 
-source("jobs/3-analysis-arguments.R")
+# Loading in objects that specify arguments passed to the 
+# analysis functions multiple times
+source("jobs/4-analysis-arguments.R")
 
 years <- c(2019, 1981)
 
@@ -37,16 +37,16 @@ main_decomp_altrefyear <- mapply(perform_decomposition_analysis, covariates_to_e
   mutate_if(is.numeric, ~.*100) %>%
   mutate_if(is.numeric, round, digits = 2)
 
-ta9 <- main_decomp_altrefyear %>%
+t_altref <- main_decomp_altrefyear %>%
   filter(Variable %in% c("num.kids.cont", "Total")) %>%
   dplyr::select(Model, Variable, ends_with("CharGap"))
 
-write_csv(ta9, "tables/tablea9.csv")
+write_csv(t_altref, "tables/table_altrefyear.csv")
 
-# Generates LaTex code to produce Table A9: Decomposition % of Change in Pay Gap Explained by Declining Fertility, by Gender
-kable(ta9 %>%
+# Generates LaTex code to produce Table A5: Decomposition % of Change in Pay Gap Explained by Declining Fertility, by Gender
+kable(t_altref %>%
         dplyr::select(-c(Variable, Model)), booktabs = T, format = "latex", 
-      caption = "Table A9: Percent of the Changing Gender Pay Gap 1980-2018 Explained by Changing Fertility, Using 2018 Wage Structure") %>%
+      caption = "Table A4:  Percent of Gender Pay Convergence 1980-2018 Explained by Fertility Decline, Using 2018 Wage Returns, by Gender") %>%
   pack_rows("Model 1: Baseline", 1, 2, bold = T) %>% 
   pack_rows("Model 2: + Background", 3, 4, bold = T) %>% 
   pack_rows("Model 3: + Education", 5, 6, bold = T) %>% 
