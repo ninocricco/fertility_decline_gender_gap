@@ -13,7 +13,7 @@ source("jobs/1-load-libraries.R")
 source("jobs/1-functions.R")
 
 # Loading the imputed dataset
-psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
+psid_imp <- read_csv(paste0("clean_data/psid_final", ".csv"))
 
 # Loading in objects that specify arguments passed to the 
 # analysis functions multiple times

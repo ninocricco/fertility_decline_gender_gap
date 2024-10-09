@@ -13,7 +13,7 @@ source("jobs/1-functions.R")
 source("jobs/1-load-libraries.R")
 
 # Loading the imputed dataset
-psid_imp <- read_csv(paste0("clean_data/psid_final_", date_run_id, ".csv"))
+psid_imp <- read_csv(paste0("clean_data/psid_final", ".csv"))
 source("jobs/4-analysis-arguments.R")
 
 for(i in 1:10000){

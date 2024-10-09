@@ -9,7 +9,7 @@
 source("jobs/1-load-libraries.R")
 source("jobs/1-functions.R")
 
-psid <- read_csv(paste0("clean_data/psid_clean_", "2024-06-06", ".csv"))
+psid <- read_csv(paste0("clean_data/psid_clean", ".csv"))
 
 #------------------------------------------------------------------------------
 # IMPUTATION
@@ -173,7 +173,7 @@ psid_imputed_final <- psid_imp %>%
   filter(.imp > 0)
 
 # Saving the final data object as a .csv file
-write_csv(psid_imputed_final, paste0("clean_data/psid_final_", Sys.Date(), ".csv"))
+write_csv(psid_imputed_final, paste0("clean_data/psid_final", ".csv"))
 
 missing_rates <- psid_imp %>% 
   filter(.imp == 0, samp.inc.final == 1, year %in% c(1981, 2019)) %>%

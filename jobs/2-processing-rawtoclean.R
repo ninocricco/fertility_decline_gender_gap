@@ -1997,5 +1997,5 @@ benchmark.ipums <- crossing(occ2010 = ipums.data$occ2010,
 #------------------------------------------------------------------------------
 # SAVE FILE TO THE CLEAN DATA FOLDER
 #------------------------------------------------------------------------------
-write_csv(benchmark.ipums, paste0("clean_data/", "psid_clean_", Sys.Date(), ".csv"))
+write_csv(benchmark.ipums, paste0("clean_data/", "psid_clean", ".csv"))
 print("Done with: All Preprocessing")
